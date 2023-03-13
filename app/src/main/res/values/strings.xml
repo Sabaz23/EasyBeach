@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Easy Beach</string>
+    <string-array name="SpinnerMainOptions">
+        <item>Prima Fila</item>
+        <item>Seconda fila</item>
+        <item>Terza Fila</item>
+        <item>Quarta Fila</item>
+    </string-array>
+</resources>
