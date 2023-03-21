@@ -1,9 +1,22 @@
 <resources>
     <string name="app_name">Easy Beach</string>
+
     <string-array name="SpinnerMainOptions">
         <item>Prima Fila</item>
         <item>Seconda fila</item>
         <item>Terza Fila</item>
         <item>Quarta Fila</item>
     </string-array>
+
+    <string name="UMBRELLAFREE">LIBERO</string>
+    <string name="UMBRELLAOCCUPIED">OCCUPATO</string>
+
+    <string name="HEADERFREE">Inserisci i dati per occuparlo:</string>
+    <string name="HEADEROCCUPIED">Modifica i dati o libera l\'ombrellone:</string>
+
+    <string name="BUTTONFREE">Conferma</string>
+    <string name="BUTTONOCCUPIED">Salva modifiche o\n Libera (tieni premuto)</string>
+
+    <string name="STARTNDEF">android.nfc.action.TECH_DISCOVERED</string>
+
 </resources>

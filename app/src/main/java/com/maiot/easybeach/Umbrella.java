@@ -3,6 +3,8 @@ package com.maiot.easybeach;
 import android.location.Location;
 
 public class Umbrella {
+
+    private String ClientName;
     private int number;
     private int row;
     //A is chair+chair, B is chair+bed, C is bed+bed
@@ -10,8 +12,9 @@ public class Umbrella {
     private boolean free;
     private Location position;
 
-    private Umbrella()
+    public Umbrella()
     {
+        this.ClientName = null;
         this.number = 0;
         this.row = 0;
         this.type = 'A';
@@ -19,8 +22,9 @@ public class Umbrella {
         this.position = null;
 
     }
-    private Umbrella(int num, int r, char t, boolean f, Location pos)
+    public Umbrella(String client, int num, int r, char t, boolean f, Location pos)
     {
+        this.ClientName = client;
         this.number = num;
         this.row = r;
         this.type = t;
