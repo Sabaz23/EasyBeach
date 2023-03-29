@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcManager;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ManageUmbrella extends AppCompatActivity {
 
@@ -26,47 +28,21 @@ public class ManageUmbrella extends AppCompatActivity {
     private DatePicker datePickerPartenza = null;
     private DatePicker datePickerArrivo = null;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_umbrella);
+        ParseNfcMessage(this.getIntent());
         Log.i(TAG, "onCreate");
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-        resolveIntent(intent);
-    }
-
-    private void resolveIntent(Intent intent)
+    void ParseNfcMessage(Intent intent)
     {
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(intent);
-
-        final String action = intent.getAction();
-        if(NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action) || NfcAdapter.ACTION_TAG_DISCOVERED.equals(action))
-        {
-            Parcelable nfctag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            if(nfctag != null)
-            {
-                Log.i(TAG,nfctag.toString());
-            }
-        }
+        Parcelable[] NdefMessageArray = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+        NdefMessage ndefMessage = (NdefMessage) NdefMessageArray[0];
+        String msg = new String(ndefMessage.getRecords()[0].getPayload());
+        Toast.makeText(this,msg,Toast.LENGTH_LONG).show();
 
     }
-
-
 }
