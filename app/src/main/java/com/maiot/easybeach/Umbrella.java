@@ -3,7 +3,6 @@ package com.maiot.easybeach;
 import android.location.Location;
 
 public class Umbrella {
-
     private String ClientName;
     private int number;
     private int row;
@@ -50,6 +49,16 @@ public class Umbrella {
 
     public char getType() {
         return type;
+    }
+
+    public String getClientName()
+    {
+        return this.ClientName;
+    }
+
+    public void setClientName(String clientName)
+    {
+        this.ClientName = clientName;
     }
 
     public void setType(char type) {

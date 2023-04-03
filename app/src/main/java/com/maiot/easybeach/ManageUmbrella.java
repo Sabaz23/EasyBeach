@@ -27,6 +27,8 @@ public class ManageUmbrella extends AppCompatActivity {
     private EditText etnomecognome = null;
     private DatePicker datePickerPartenza = null;
     private DatePicker datePickerArrivo = null;
+    private int rNum = 0;
+    private int UmbrellaNumber = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +44,22 @@ public class ManageUmbrella extends AppCompatActivity {
         Parcelable[] NdefMessageArray = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
         NdefMessage ndefMessage = (NdefMessage) NdefMessageArray[0];
         String msg = new String(ndefMessage.getRecords()[0].getPayload());
+        ParsePayload(msg);
         Toast.makeText(this,msg,Toast.LENGTH_LONG).show();
 
     }
+
+    void ParsePayload(String msg)
+    {
+        String splittedString[] = msg.split("-");
+        rNum = Integer.parseInt(splittedString[0]);
+        UmbrellaNumber = Integer.parseInt(splittedString[1]);
+    }
+
+    void LoadUmbrellas()
+    {
+
+    }
+
+
 }

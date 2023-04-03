@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Easy Beach</string>
 
+    <!-- Stringhe per lo spinner in MainActivity -->
+
     <string-array name="SpinnerMainOptions">
         <item>Prima Fila</item>
         <item>Seconda fila</item>
@@ -8,15 +10,20 @@
         <item>Quarta Fila</item>
     </string-array>
 
-    <string name="UMBRELLAFREE">LIBERO</string>
-    <string name="UMBRELLAOCCUPIED">OCCUPATO</string>
+    <!-- Stringhe per Activity ManageUmbrella -->
 
-    <string name="HEADERFREE">Inserisci i dati per occuparlo:</string>
-    <string name="HEADEROCCUPIED">Modifica i dati o libera l\'ombrellone:</string>
+    <string name="UMBRELLA_FREE">LIBERO</string>
+    <string name="UMBRELLA_OCCUPIED">OCCUPATO</string>
 
-    <string name="BUTTONFREE">Conferma</string>
-    <string name="BUTTONOCCUPIED">Salva modifiche o\n Libera (tieni premuto)</string>
+    <string name="HEADER_FREE">Inserisci i dati per occuparlo:</string>
+    <string name="HEADER_OCCUPIED">Modifica i dati o libera l\'ombrellone:</string>
 
-    <string name="STARTNDEF">android.nfc.action.TECH_DISCOVERED</string>
+    <string name="BUTTON_FREE">Conferma</string>
+    <string name="BUTTON_OCCUPIED">Salva modifiche o\n Libera (tieni premuto)</string>
+
+    <!-- Stringhe Utili -->
+
+    <string name="UMBRELLA_FILENAME">umbrellas</string>
+
 
 </resources>

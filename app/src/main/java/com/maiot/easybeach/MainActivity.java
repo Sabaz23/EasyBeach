@@ -18,6 +18,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,12 +38,16 @@ public class MainActivity extends AppCompatActivity {
 
     private Button UmbrellaButtons[] = null;
 
+    private File umbrellaFile = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        String filePath = getApplicationContext().getFilesDir().getPath().toString() + "/" + getString(R.string.UMBRELLA_FILENAME);
+        umbrellaFile = new File(filePath);
 
+        Utils.LoadUmbrellaFile(umbrellaFile,getApplicationContext());
 
         //Populate Rows (TODO OnCreate Load)
         Umbrella[] tmp = new Umbrella[]{new Umbrella(),new Umbrella(),new Umbrella(),new Umbrella()
@@ -90,6 +100,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Utils.SaveUmbrellaFile(umbrellaFile,rows,getApplicationContext());
+    }
+
     private View.OnClickListener UmbrellaListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -109,7 +125,9 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }
+
     };
+
 
 
 }
