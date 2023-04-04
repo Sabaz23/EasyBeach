@@ -46,14 +46,21 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         String filePath = getApplicationContext().getFilesDir().getPath().toString() + "/" + getString(R.string.UMBRELLA_FILENAME);
         umbrellaFile = new File(filePath);
+        if(umbrellaFile.exists())
+        {
+            rows = Utils.LoadUmbrellaFile(umbrellaFile,getApplicationContext());
+        }
+        else {
+            rows = Utils.PopulateRowsFirstTime(umbrellaFile, getApplicationContext());
+        }
 
-        Utils.LoadUmbrellaFile(umbrellaFile,getApplicationContext());
 
-        //Populate Rows (TODO OnCreate Load)
-        Umbrella[] tmp = new Umbrella[]{new Umbrella(),new Umbrella(),new Umbrella(),new Umbrella()
-                ,new Umbrella(),new Umbrella(),new Umbrella(),new Umbrella(),new Umbrella(),new Umbrella()
-                ,new Umbrella(),new Umbrella()};
-        rows = new Row[]{new Row(tmp,0),new Row(tmp,1),new Row(tmp,2),new Row(tmp,3)};
+        Log.i(TAG, "Ombrelloni caricati.");
+
+        for(int i=0;i<rows.length;i++)
+            for(int j=0;j<12;j++)
+                Log.i(TAG, "Ombrellone " + rows[i].UmbrellaAtPosition(j).getNumber() + " Fila: "
+                + rows[i].UmbrellaAtPosition(j).getRow() + " tipo: " + rows[i].UmbrellaAtPosition(j).getType());
 
         //Get current Date
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
