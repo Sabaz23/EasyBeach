@@ -93,17 +93,13 @@ public class Utils {
             for(int i = 0; i<data.length;i++)
             {
                 for(int j=0;j<UmbrellaPerRow;j++) {
+                    Log.i(TAG, "Controllo la fila " + i + " e l'ombrellone " + j);
                     dataToWrite = (data[i].UmbrellaAtPosition(j).getClientName() + "," +
                             data[i].UmbrellaAtPosition(j).getNumber() + "," +
                             data[i].UmbrellaAtPosition(j).getRow() + "," +
                             data[i].UmbrellaAtPosition(j).getType() + "," +
                             data[i].UmbrellaAtPosition(j).isFree() + "\n").getBytes(StandardCharsets.UTF_8);
                     fos.write(dataToWrite);
-                    Log.i(TAG, "DataToWrite" + data[i].UmbrellaAtPosition(j).getClientName() + "," +
-                            data[i].UmbrellaAtPosition(j).getNumber() + "," +
-                            data[i].UmbrellaAtPosition(j).getRow() + "," +
-                            data[i].UmbrellaAtPosition(j).getType() + "," +
-                            data[i].UmbrellaAtPosition(j).isFree() + "\n");
                 }
             }
             Log.i(TAG, "Tutto ok! File scritto!");
@@ -150,6 +146,7 @@ public class Utils {
         rows.toArray(RowArray);
 
         SaveUmbrellaFile(filename, RowArray, appContext);
+
         return RowArray;
     }
 
