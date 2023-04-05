@@ -47,10 +47,24 @@ public class Utils {
         Umbrella tmp = null;
         ArrayList<Umbrella> tmpArray = new ArrayList<>();
         int rowNumber = 0;
+
         for(int i=0;i<Umbrellas.length;i++)
         {
             if((i % UmbrellaPerRow == 0 && i!=0) || i == Umbrellas.length - 1)
             {
+                if(i == Umbrellas.length -1)
+                {
+                    UmbrellaValues = Umbrellas[i].split(",");
+                    //Variabili per inizializzare UmbrellaTmp
+                    String name = UmbrellaValues[0];
+                    int UmbrellaNum = Integer.parseInt(UmbrellaValues[1]);
+                    char TypeOfUmbrella = UmbrellaValues[3].charAt(0);
+                    boolean free = Boolean.parseBoolean(UmbrellaValues[4]);
+                    //Creo un ombrellone temporaneo con la riga letta e lo aggiungo all'array
+                    tmp = new Umbrella(name, UmbrellaNum, rowNumber, TypeOfUmbrella, free,null);
+                    tmpArray.add(tmp);
+                }
+
                 //Converto la lista di ombrelloni della fila in array
                 Umbrella[] array = new Umbrella[tmpArray.size()];
                 tmpArray.toArray(array);
@@ -64,18 +78,20 @@ public class Utils {
                 rowNumber++;
             }
 
-            UmbrellaValues = Umbrellas[i].split(",");
+            if(i != Umbrellas.length-1)
+            {
+                UmbrellaValues = Umbrellas[i].split(",");
 
-            //Variabili per inizializzare UmbrellaTmp
-            String name = UmbrellaValues[0];
-            int UmbrellaNum = Integer.parseInt(UmbrellaValues[1]);
-            char TypeOfUmbrella = UmbrellaValues[3].charAt(0);
-            boolean free = Boolean.parseBoolean(UmbrellaValues[4]);
+                //Variabili per inizializzare UmbrellaTmp
+                String name = UmbrellaValues[0];
+                int UmbrellaNum = Integer.parseInt(UmbrellaValues[1]);
+                char TypeOfUmbrella = UmbrellaValues[3].charAt(0);
+                boolean free = Boolean.parseBoolean(UmbrellaValues[4]);
 
-
-            //Creo un ombrellone temporaneo con la riga letta e lo aggiungo all'array
-            tmp = new Umbrella(name, UmbrellaNum, rowNumber, TypeOfUmbrella, free,null);
-            tmpArray.add(tmp);
+                //Creo un ombrellone temporaneo con la riga letta e lo aggiungo all'array
+                tmp = new Umbrella(name, UmbrellaNum, rowNumber, TypeOfUmbrella, free, null);
+                tmpArray.add(tmp);
+            }
         }
         Row[] arrayOfRows = new Row[rows.size()];
         rows.toArray(arrayOfRows);
@@ -86,7 +102,6 @@ public class Utils {
     {
         try{
             boolean r = umbrellaFile.createNewFile(); //Crea il file solo se necessario (Ex. la prima volta che si avvia in assoluto)
-            Log.i(TAG, "File creato: " + r);
             FileOutputStream fos = AppContext.openFileOutput(umbrellaFile.getName(), Context.MODE_PRIVATE);
             byte[] dataToWrite = null;
 
@@ -102,7 +117,6 @@ public class Utils {
                     fos.write(dataToWrite);
                 }
             }
-            Log.i(TAG, "Tutto ok! File scritto!");
         }
         catch (FileNotFoundException e) {
             Log.e(TAG,"File non trovato durante il salvataggio: " + e.getMessage());
@@ -124,27 +138,46 @@ public class Utils {
         String UmbrellaTypes = "ABC";
         for(int i=0; i<TotalUmbrellas; i++)
         {
-            if(i % UmbrellaPerRow-1 == 0 && i!=0)
-            {
+
+            if(((i % UmbrellaPerRow == 0) && (i!=0)) || (i == TotalUmbrellas - 1)) {
+
+                if(i == TotalUmbrellas - 1)
+                {
+                    Random r = new Random();
+                    u = new Umbrella(null, umbrellaNumber, rowNumber, UmbrellaTypes.charAt(r.nextInt(UmbrellaTypes.length())),
+                            true,null);
+                    uArr.add(u);
+
+                }
+
                 Umbrella[] UmbArray = new Umbrella[uArr.size()];
                 uArr.toArray(UmbArray);
 
-                rows.add(new Row(UmbArray,rowNumber));
+
+
+                rows.add(new Row(UmbArray, rowNumber));
 
                 uArr.clear();
 
                 rowNumber++;
                 umbrellaNumber = 1;
+
             }
-            Random r = new Random();
-            u = new Umbrella(null, umbrellaNumber, rowNumber, UmbrellaTypes.charAt(r.nextInt(UmbrellaTypes.length())),
-                    true,null);
-            uArr.add(u);
-            umbrellaNumber++;
+
+            if( i != TotalUmbrellas -1)
+            {
+                Random r = new Random();
+                u = new Umbrella(null, umbrellaNumber, rowNumber, UmbrellaTypes.charAt(r.nextInt(UmbrellaTypes.length())),
+                        true,null);
+
+                uArr.add(u);
+
+                umbrellaNumber++;
+            }
         }
+
         Row[] RowArray = new Row[rows.size()];
         rows.toArray(RowArray);
-
         SaveUmbrellaFile(filename, RowArray, appContext);
 
         return RowArray;

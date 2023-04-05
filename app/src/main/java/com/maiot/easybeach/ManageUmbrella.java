@@ -17,6 +17,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+
 public class ManageUmbrella extends AppCompatActivity {
 
     private NfcAdapter adapter = null;
@@ -30,12 +32,28 @@ public class ManageUmbrella extends AppCompatActivity {
     private int rNum = 0;
     private int UmbrellaNumber = 0;
 
+    private Row[] rows = null;
+
+    File umbrellaFile = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_umbrella);
+        String filePath = getApplicationContext().getFilesDir().getPath().toString()
+                + "/" + getString(R.string.UMBRELLA_FILENAME);
+        umbrellaFile = new File(filePath);
+
+        if(umbrellaFile.exists())
+            rows = Utils.LoadUmbrellaFile(umbrellaFile,getApplicationContext());
+        else
+            rows = Utils.PopulateRowsFirstTime(umbrellaFile, getApplicationContext());
         ParseNfcMessage(this.getIntent());
-        Log.i(TAG, "onCreate");
+
+        tvfree = findViewById(R.id.tvfree);
+        tvinseriscidati = findViewById(R.id.tvinseriscidati);
+        etnomecognome = findViewById(R.id.etnomecognome);
+
     }
 
 
@@ -45,21 +63,24 @@ public class ManageUmbrella extends AppCompatActivity {
         NdefMessage ndefMessage = (NdefMessage) NdefMessageArray[0];
         String msg = new String(ndefMessage.getRecords()[0].getPayload());
         ParsePayload(msg);
-        Toast.makeText(this,msg,Toast.LENGTH_LONG).show();
 
     }
 
     void ParsePayload(String msg)
     {
         String splittedString[] = msg.split("-");
+        //rNum e UmbrellaNumber sono scriti sul tag, quindi 0-00 corrisponde al primo ombrellone
+        //della prima fila. Analogalmente, 1-11 corrisponde al dodicesimo ombrellone della seconda
+        //fila.
+
         rNum = Integer.parseInt(splittedString[0]);
         UmbrellaNumber = Integer.parseInt(splittedString[1]);
     }
 
-    void LoadUmbrellas()
+    void FillView()
     {
+        Umbrella u = rows[rNum].UmbrellaAtPosition(UmbrellaNumber);
 
     }
-
 
 }

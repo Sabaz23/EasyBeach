@@ -44,8 +44,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        String filePath = getApplicationContext().getFilesDir().getPath().toString() + "/" + getString(R.string.UMBRELLA_FILENAME);
+        String filePath = getApplicationContext().getFilesDir().getPath().toString()
+                + "/" + getString(R.string.UMBRELLA_FILENAME);
+
         umbrellaFile = new File(filePath);
+
         if(umbrellaFile.exists())
         {
             rows = Utils.LoadUmbrellaFile(umbrellaFile,getApplicationContext());
@@ -58,9 +61,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG, "Ombrelloni caricati.");
 
         for(int i=0;i<rows.length;i++)
-            for(int j=0;j<12;j++)
-                Log.i(TAG, "Ombrellone " + rows[i].UmbrellaAtPosition(j).getNumber() + " Fila: "
-                + rows[i].UmbrellaAtPosition(j).getRow() + " tipo: " + rows[i].UmbrellaAtPosition(j).getType());
+            rows[i].LogAllRow();
 
         //Get current Date
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");

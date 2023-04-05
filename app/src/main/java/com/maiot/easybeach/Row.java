@@ -1,5 +1,7 @@
 package com.maiot.easybeach;
 
+import android.util.Log;
+
 public class Row {
 
     private Umbrella Umbrellas[];
@@ -29,4 +31,16 @@ public class Row {
         return Umbrellas[i];
     }
 
+    public void LogAllRow()
+    {
+        Log.i("RowLog", "LogAllRow:");
+        for(int i =0; i< Umbrellas.length; i++)
+            Log.i("RowLog", "Ombrellone numero" + Umbrellas[i].getNumber() +
+                    " con indice " + i + " fila " + Umbrellas[i].getRow());
+    }
+
+    public int NumberOfUmbrellaInRow()
+    {
+        return Umbrellas.length;
+    }
 }
