@@ -11,7 +11,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Random;
 
 public class Utils {
@@ -60,8 +64,21 @@ public class Utils {
                     int UmbrellaNum = Integer.parseInt(UmbrellaValues[1]);
                     char TypeOfUmbrella = UmbrellaValues[3].charAt(0);
                     boolean free = Boolean.parseBoolean(UmbrellaValues[4]);
+                    Date sd = null;
+                    Date fd = null;
+                    if(UmbrellaValues.length>5) //Se le date sono state settate
+                    {
+                        try
+                        {
+                            sd = new SimpleDateFormat("dd/MM/yyyy").parse(UmbrellaValues[5]);
+                            fd = new SimpleDateFormat("dd/MM/yyyy)").parse(UmbrellaValues[6]);
+                        }
+                        catch (java.text.ParseException e) {
+                            Log.e(TAG,"Problema nella lettura " + e.getMessage());
+                        }
+                    }
                     //Creo un ombrellone temporaneo con la riga letta e lo aggiungo all'array
-                    tmp = new Umbrella(name, UmbrellaNum, rowNumber, TypeOfUmbrella, free,null);
+                    tmp = new Umbrella(name, UmbrellaNum, rowNumber, TypeOfUmbrella, free,null,sd,fd);
                     tmpArray.add(tmp);
                 }
 
@@ -87,9 +104,24 @@ public class Utils {
                 int UmbrellaNum = Integer.parseInt(UmbrellaValues[1]);
                 char TypeOfUmbrella = UmbrellaValues[3].charAt(0);
                 boolean free = Boolean.parseBoolean(UmbrellaValues[4]);
+                Date sd = null;
+                Date fd = null;
+                if(UmbrellaValues.length > 5)
+                {
+                    try
+                    {
+                        //Questo lo prende
+                        sd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).parse(UmbrellaValues[5]);
+                        //Ma questo no
+                        fd = new SimpleDateFormat("dd/MM/yyyy)", Locale.ITALIAN).parse(UmbrellaValues[6]);
+                    }
+                    catch (java.text.ParseException e) {
+                        Log.e(TAG,"Problema nella lettura " + e.getMessage());
+                    }
+                }
 
                 //Creo un ombrellone temporaneo con la riga letta e lo aggiungo all'array
-                tmp = new Umbrella(name, UmbrellaNum, rowNumber, TypeOfUmbrella, free, null);
+                tmp = new Umbrella(name, UmbrellaNum, rowNumber, TypeOfUmbrella, free, null,sd,fd);
                 tmpArray.add(tmp);
             }
         }
@@ -103,8 +135,8 @@ public class Utils {
         try{
             boolean r = umbrellaFile.createNewFile(); //Crea il file solo se necessario (Ex. la prima volta che si avvia in assoluto)
             FileOutputStream fos = AppContext.openFileOutput(umbrellaFile.getName(), Context.MODE_PRIVATE);
-            byte[] dataToWrite = null;
-
+            String dataToWrite = null;
+            byte[] byteToWrite = null;
             for(int i = 0; i<data.length;i++)
             {
                 for(int j=0;j<UmbrellaPerRow;j++) {
@@ -113,8 +145,23 @@ public class Utils {
                             data[i].UmbrellaAtPosition(j).getNumber() + "," +
                             data[i].UmbrellaAtPosition(j).getRow() + "," +
                             data[i].UmbrellaAtPosition(j).getType() + "," +
-                            data[i].UmbrellaAtPosition(j).isFree() + "\n").getBytes(StandardCharsets.UTF_8);
-                    fos.write(dataToWrite);
+                            data[i].UmbrellaAtPosition(j).isFree());
+                    if(data[i].UmbrellaAtPosition(j).getStartDate() != null)
+                    {
+                        String sd = new SimpleDateFormat("dd/MM/yyyy").format(data[i].UmbrellaAtPosition(j).getStartDate());
+                        String fd = new SimpleDateFormat("dd/MM/yyyy").format(data[i].UmbrellaAtPosition(j).getFinishDate());
+
+                        Log.i(TAG,"Fd " + sd);
+                        Log.i(TAG, "Sd " + fd);
+
+                        byteToWrite = (dataToWrite + "," + sd + "," +
+                                fd + "\n").getBytes(StandardCharsets.UTF_8);
+
+                    }else
+                    {
+                        byteToWrite = (dataToWrite + "\n").getBytes(StandardCharsets.UTF_8);
+                    }
+                    fos.write(byteToWrite);
                 }
             }
         }
@@ -145,7 +192,7 @@ public class Utils {
                 {
                     Random r = new Random();
                     u = new Umbrella(null, umbrellaNumber, rowNumber, UmbrellaTypes.charAt(r.nextInt(UmbrellaTypes.length())),
-                            true,null);
+                            true,null,null,null);
                     uArr.add(u);
 
                 }
@@ -168,7 +215,7 @@ public class Utils {
             {
                 Random r = new Random();
                 u = new Umbrella(null, umbrellaNumber, rowNumber, UmbrellaTypes.charAt(r.nextInt(UmbrellaTypes.length())),
-                        true,null);
+                        true,null,null,null);
 
                 uArr.add(u);
 

@@ -1,89 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:gravity="center_horizontal"
-    tools:context=".ManageUmbrella">
+    android:padding="10dp"
+    android:fillViewport="false">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hai scannerizzato un ombrellone!"
-        android:layout_marginTop="20dp"
-        android:textSize="20dp"
-        android:textStyle="bold"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Questo ombrellone è attualmente:"
-        android:textSize="16dp"
-        />
-
-    <TextView
-        android:id="@+id/tvfree"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:textSize="20dp"
-        android:textStyle="bold"
-        />
-
-    <TextView
-        android:id="@+id/tvinseriscidati"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="16dp"
-        android:layout_marginTop="10dp"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Nome e Cognome:"
-        android:textSize="13dp"
-        android:layout_marginTop="10dp"
-        />
-
-    <EditText
-        android:id="@+id/etnomecognome"
-        android:hint="Inserisci nome e cognome..."
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        tools:context=".ManageUmbrella">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Data arrivo e partenza:"
-        android:textSize="13dp"
-        android:layout_marginTop="10dp"
-        />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hai scannerizzato un ombrellone!"
+            android:layout_marginTop="20dp"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            />
 
-    <DatePicker
-        android:id="@+id/datePickerArrivo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:calendarViewShown="false"
-        android:datePickerMode="spinner" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Questo ombrellone è attualmente:"
+            android:textSize="16dp"
+            />
 
-    <DatePicker
-        android:id="@+id/datePickerPartenza"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:calendarViewShown="false"
-        android:datePickerMode="spinner" />
+        <TextView
+            android:id="@+id/tvfree"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            />
 
-    <Button
-        android:id="@+id/bttok"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
+        <TextView
+            android:id="@+id/tvinseriscidati"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16dp"
+            android:layout_marginTop="10dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nome e Cognome:"
+            android:textSize="13dp"
+            android:layout_marginTop="10dp"
+            />
+
+        <EditText
+            android:id="@+id/etnomecognome"
+            android:hint="Inserisci nome e cognome..."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Data arrivo e partenza:"
+            android:textSize="13dp"
+            android:layout_marginTop="10dp"
+            />
+
+        <DatePicker
+            android:id="@+id/datePickerStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:calendarViewShown="false"
+            android:datePickerMode="spinner" />
+
+        <DatePicker
+            android:id="@+id/datePickerFinish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:calendarViewShown="false"
+            android:datePickerMode="spinner" />
+
+        <Button
+            android:id="@+id/bttok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
 
 
 
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>

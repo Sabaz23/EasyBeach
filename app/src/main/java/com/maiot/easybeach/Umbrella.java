@@ -2,6 +2,8 @@ package com.maiot.easybeach;
 
 import android.location.Location;
 
+import java.util.Date;
+
 public class Umbrella {
     private String ClientName;
     private int number;
@@ -11,6 +13,8 @@ public class Umbrella {
     private boolean free;
     private Location position;
 
+    private Date startDate, finishDate;
+
     public Umbrella()
     {
         this.ClientName = null;
@@ -19,9 +23,10 @@ public class Umbrella {
         this.type = 'A';
         this.free = true;
         this.position = null;
-
+        this.startDate = null;
+        this.finishDate = null;
     }
-    public Umbrella(String client, int num, int r, char t, boolean f, Location pos)
+    public Umbrella(String client, int num, int r, char t, boolean f, Location pos, Date sd, Date fd)
     {
         this.ClientName = client;
         this.number = num;
@@ -29,6 +34,8 @@ public class Umbrella {
         this.type = t;
         this.free = f;
         this.position = pos;
+        this.startDate = sd;
+        this.finishDate = sd;
     }
 
     public int getNumber() {
@@ -79,5 +86,37 @@ public class Umbrella {
 
     public void setPosition(Location position) {
         this.position = position;
+    }
+
+    public Date getStartDate()
+    {
+        return this.startDate;
+    }
+
+    public Date getFinishDate()
+    {
+        return this.finishDate;
+    }
+
+    public void setStartDate(Date sd)
+    {
+        this.startDate = sd;
+    }
+
+    public void setFinishDate(Date fd)
+    {
+        this.finishDate = fd;
+    }
+
+    public void UpdateUmbrella(Umbrella u)
+    {
+        this.ClientName = u.getClientName();
+        this.number = u.getNumber();
+        this.row = u.getRow();
+        this.type = u.getType();
+        this.free = u.isFree();
+        this.position = u.getPosition();
+        this.startDate = u.getStartDate();
+        this.finishDate = u.getFinishDate();
     }
 }

@@ -48,7 +48,8 @@ public class MainActivity extends AppCompatActivity {
                 + "/" + getString(R.string.UMBRELLA_FILENAME);
 
         umbrellaFile = new File(filePath);
-
+        //umbrellaFile.delete();
+        Log.i(TAG, "Esiste " + umbrellaFile.exists() + filePath);
         if(umbrellaFile.exists())
         {
             rows = Utils.LoadUmbrellaFile(umbrellaFile,getApplicationContext());

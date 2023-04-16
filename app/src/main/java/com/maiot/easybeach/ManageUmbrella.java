@@ -5,12 +5,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.Color;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -18,6 +21,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoField;
+import java.util.Calendar;
+import java.util.Date;
 
 public class ManageUmbrella extends AppCompatActivity {
 
@@ -27,11 +37,13 @@ public class ManageUmbrella extends AppCompatActivity {
     private TextView tvfree = null;
     private TextView tvinseriscidati = null;
     private EditText etnomecognome = null;
-    private DatePicker datePickerPartenza = null;
-    private DatePicker datePickerArrivo = null;
+    private DatePicker datePickerStart = null;
+    private DatePicker datePickerFinish = null;
+    private Button btnConfirm = null;
     private int rNum = 0;
     private int UmbrellaNumber = 0;
 
+    private Umbrella u = null;
     private Row[] rows = null;
 
     File umbrellaFile = null;
@@ -48,12 +60,18 @@ public class ManageUmbrella extends AppCompatActivity {
             rows = Utils.LoadUmbrellaFile(umbrellaFile,getApplicationContext());
         else
             rows = Utils.PopulateRowsFirstTime(umbrellaFile, getApplicationContext());
-        ParseNfcMessage(this.getIntent());
+
 
         tvfree = findViewById(R.id.tvfree);
         tvinseriscidati = findViewById(R.id.tvinseriscidati);
         etnomecognome = findViewById(R.id.etnomecognome);
+        btnConfirm = findViewById(R.id.bttok);
+        datePickerStart = findViewById(R.id.datePickerStart);
+        datePickerFinish = findViewById(R.id.datePickerFinish);
+        btnConfirm.setOnClickListener(BttListener);
 
+        ParseNfcMessage(this.getIntent());
+        FillView();
     }
 
 
@@ -79,8 +97,71 @@ public class ManageUmbrella extends AppCompatActivity {
 
     void FillView()
     {
-        Umbrella u = rows[rNum].UmbrellaAtPosition(UmbrellaNumber);
+        u = rows[rNum].UmbrellaAtPosition(UmbrellaNumber);
+
+        //Coloriamo il testo in base alla disponibilità dell'ombrellone
+        if(u.isFree()) {
+            tvfree.setText(R.string.UMBRELLA_FREE);
+            tvfree.setTextColor(Color.GREEN);
+
+            tvinseriscidati.setText(R.string.HEADER_FREE);
+
+            btnConfirm.setText(R.string.BUTTON_FREE);
+
+            //Usiamo i metodi deprecati perchè i metodi che vanno a sostituirli richiedono api 26
+            //e noi usiamo api 24 (LocalTime.now() ecc..)
+            Calendar c = Calendar.getInstance();
+            datePickerStart.updateDate(c.getTime().getYear(),c.getTime().getMonth(),c.getTime().getDay());
+            datePickerStart.setMinDate(c.getTimeInMillis());
+            datePickerFinish.setMinDate(c.getTimeInMillis());
+
+        }
+        else {
+            tvfree.setText(R.string.UMBRELLA_OCCUPIED);
+            tvfree.setTextColor(Color.RED);
+
+            tvinseriscidati.setText(R.string.HEADER_OCCUPIED);
+            etnomecognome.setText(u.getClientName());
+
+            btnConfirm.setText(R.string.BUTTON_OCCUPIED);
+
+            Calendar c = Calendar.getInstance();
+            c.setTime(u.getStartDate());
+            datePickerStart.updateDate(c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
+            c.setTime(u.getFinishDate());
+            datePickerFinish.updateDate(c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
+
+        }
 
     }
+
+    private View.OnClickListener BttListener = new View.OnClickListener(){
+
+        @Override
+        public void onClick(View view) {
+            Button b = (Button)view;
+            String bttText = b.getText().toString();
+            if(getString(R.string.BUTTON_FREE).equals(bttText) )
+            {
+                if(etnomecognome.getText().toString().equals(""))
+                    Toast.makeText(getApplicationContext(), "Inserisci nome e cognome", Toast.LENGTH_LONG).show();
+                else
+                {
+                    u.setFree(false);
+                    u.setClientName(etnomecognome.getText().toString());
+
+                    Calendar c = Calendar.getInstance();
+                    c.set(datePickerStart.getYear(),datePickerStart.getMonth(),datePickerStart.getDayOfMonth());
+                    u.setStartDate(c.getTime());
+                    c.set(datePickerFinish.getYear(),datePickerFinish.getMonth(), datePickerFinish.getDayOfMonth());
+                    u.setFinishDate(c.getTime());
+
+                    rows[rNum].UmbrellaAtPosition(UmbrellaNumber).UpdateUmbrella(u);
+                    Utils.SaveUmbrellaFile(umbrellaFile, rows, getApplicationContext());
+                    Toast.makeText(getApplicationContext(),"Ombrellone salvato con successo!", Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+    };
 
 }
