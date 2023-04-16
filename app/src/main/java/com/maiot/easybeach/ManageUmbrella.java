@@ -68,7 +68,9 @@ public class ManageUmbrella extends AppCompatActivity {
         btnConfirm = findViewById(R.id.bttok);
         datePickerStart = findViewById(R.id.datePickerStart);
         datePickerFinish = findViewById(R.id.datePickerFinish);
+
         btnConfirm.setOnClickListener(BttListener);
+        btnConfirm.setOnLongClickListener(bttLongClick);
 
         ParseNfcMessage(this.getIntent());
         FillView();
@@ -81,12 +83,11 @@ public class ManageUmbrella extends AppCompatActivity {
         NdefMessage ndefMessage = (NdefMessage) NdefMessageArray[0];
         String msg = new String(ndefMessage.getRecords()[0].getPayload());
         ParsePayload(msg);
-
     }
 
     void ParsePayload(String msg)
     {
-        String splittedString[] = msg.split("-");
+        String[] splittedString = msg.split("-");
         //rNum e UmbrellaNumber sono scriti sul tag, quindi 0-00 corrisponde al primo ombrellone
         //della prima fila. Analogalmente, 1-11 corrisponde al dodicesimo ombrellone della seconda
         //fila.
@@ -157,10 +158,26 @@ public class ManageUmbrella extends AppCompatActivity {
                     u.setFinishDate(c.getTime());
 
                     rows[rNum].UmbrellaAtPosition(UmbrellaNumber).UpdateUmbrella(u);
+
                     Utils.SaveUmbrellaFile(umbrellaFile, rows, getApplicationContext());
                     Toast.makeText(getApplicationContext(),"Ombrellone salvato con successo!", Toast.LENGTH_LONG).show();
                 }
             }
+        }
+    };
+
+    private View.OnLongClickListener bttLongClick = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View view) {
+            Button b = (Button)view;
+            //Se il testo è = a quello del bottone occupato (Quindi l'ombrellone è occupato)
+            if(b.getText().toString().equals(getString(R.string.BUTTON_OCCUPIED)))
+            {
+                rows[rNum].UmbrellaAtPosition(UmbrellaNumber).setUmbrellaFree();
+                Utils.SaveUmbrellaFile(umbrellaFile, rows, getApplicationContext());
+                Toast.makeText(getApplicationContext(), "Ombrellone liberato!", Toast.LENGTH_LONG).show();
+            }
+            return true;
         }
     };
 

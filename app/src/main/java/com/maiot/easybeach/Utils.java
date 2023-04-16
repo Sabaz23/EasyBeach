@@ -13,13 +13,12 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
 
 public class Utils {
-    private static String TAG = "Utils";
+    private static final String TAG = "Utils";
     private static final int UmbrellaPerRow = 12;
     public static Row[] LoadUmbrellaFile(File umbrellaFile, Context AppContext)
     {
@@ -34,7 +33,7 @@ public class Utils {
         InputStreamReader inputStreamReader = new InputStreamReader(fis, StandardCharsets.UTF_8);
         StringBuilder stringBuilder = new StringBuilder();
         ArrayList<Row> rows = new ArrayList<>();
-        String contents = null;
+        String contents;
         try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
             String line = reader.readLine();
             while (line != null) {
@@ -47,8 +46,8 @@ public class Utils {
         contents = stringBuilder.toString();
         String[] Umbrellas = contents.split("\n");
 
-        String[] UmbrellaValues = null;
-        Umbrella tmp = null;
+        String[] UmbrellaValues;
+        Umbrella tmp;
         ArrayList<Umbrella> tmpArray = new ArrayList<>();
         int rowNumber = 0;
 
@@ -70,8 +69,11 @@ public class Utils {
                     {
                         try
                         {
-                            sd = new SimpleDateFormat("dd/MM/yyyy").parse(UmbrellaValues[5]);
-                            fd = new SimpleDateFormat("dd/MM/yyyy)").parse(UmbrellaValues[6]);
+                            sd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).parse(UmbrellaValues[5]);
+                            fd = new SimpleDateFormat("dd/MM/yyyy)", Locale.ITALIAN).parse(UmbrellaValues[6]);
+
+                            Log.i(TAG,"Fd " + sd);
+                            Log.i(TAG, "Sd " + fd);
                         }
                         catch (java.text.ParseException e) {
                             Log.e(TAG,"Problema nella lettura " + e.getMessage());
@@ -110,10 +112,8 @@ public class Utils {
                 {
                     try
                     {
-                        //Questo lo prende
                         sd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).parse(UmbrellaValues[5]);
-                        //Ma questo no
-                        fd = new SimpleDateFormat("dd/MM/yyyy)", Locale.ITALIAN).parse(UmbrellaValues[6]);
+                        fd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).parse(UmbrellaValues[6]);
                     }
                     catch (java.text.ParseException e) {
                         Log.e(TAG,"Problema nella lettura " + e.getMessage());
@@ -134,9 +134,10 @@ public class Utils {
     {
         try{
             boolean r = umbrellaFile.createNewFile(); //Crea il file solo se necessario (Ex. la prima volta che si avvia in assoluto)
+            Log.i(TAG,"File creato: " + r);
             FileOutputStream fos = AppContext.openFileOutput(umbrellaFile.getName(), Context.MODE_PRIVATE);
-            String dataToWrite = null;
-            byte[] byteToWrite = null;
+            String dataToWrite;
+            byte[] byteToWrite;
             for(int i = 0; i<data.length;i++)
             {
                 for(int j=0;j<UmbrellaPerRow;j++) {
@@ -148,11 +149,9 @@ public class Utils {
                             data[i].UmbrellaAtPosition(j).isFree());
                     if(data[i].UmbrellaAtPosition(j).getStartDate() != null)
                     {
-                        String sd = new SimpleDateFormat("dd/MM/yyyy").format(data[i].UmbrellaAtPosition(j).getStartDate());
-                        String fd = new SimpleDateFormat("dd/MM/yyyy").format(data[i].UmbrellaAtPosition(j).getFinishDate());
+                        String sd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).format(data[i].UmbrellaAtPosition(j).getStartDate());
+                        String fd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).format(data[i].UmbrellaAtPosition(j).getFinishDate());
 
-                        Log.i(TAG,"Fd " + sd);
-                        Log.i(TAG, "Sd " + fd);
 
                         byteToWrite = (dataToWrite + "," + sd + "," +
                                 fd + "\n").getBytes(StandardCharsets.UTF_8);
@@ -177,7 +176,7 @@ public class Utils {
     public static Row[] PopulateRowsFirstTime(File filename, Context appContext)
     {
         ArrayList<Row> rows = new ArrayList<>();
-        Umbrella u = null;
+        Umbrella u;
         ArrayList<Umbrella>uArr = new ArrayList<>();
         int TotalUmbrellas = UmbrellaPerRow * 4;
         int rowNumber = 0;

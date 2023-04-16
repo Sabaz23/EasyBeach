@@ -119,4 +119,12 @@ public class Umbrella {
         this.startDate = u.getStartDate();
         this.finishDate = u.getFinishDate();
     }
+
+    public void setUmbrellaFree()
+    {
+        this.ClientName = null;
+        this.free = true;
+        this.startDate = null;
+        this.finishDate = null;
+    }
 }
