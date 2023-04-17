@@ -88,6 +88,7 @@ public class ManageUmbrella extends AppCompatActivity {
     void ParsePayload(String msg)
     {
         String[] splittedString = msg.split("-");
+
         //rNum e UmbrellaNumber sono scriti sul tag, quindi 0-00 corrisponde al primo ombrellone
         //della prima fila. Analogalmente, 1-11 corrisponde al dodicesimo ombrellone della seconda
         //fila.
@@ -109,10 +110,8 @@ public class ManageUmbrella extends AppCompatActivity {
 
             btnConfirm.setText(R.string.BUTTON_FREE);
 
-            //Usiamo i metodi deprecati perchè i metodi che vanno a sostituirli richiedono api 26
-            //e noi usiamo api 24 (LocalTime.now() ecc..)
             Calendar c = Calendar.getInstance();
-            datePickerStart.updateDate(c.getTime().getYear(),c.getTime().getMonth(),c.getTime().getDay());
+            datePickerStart.updateDate(c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
             datePickerStart.setMinDate(c.getTimeInMillis());
             datePickerFinish.setMinDate(c.getTimeInMillis());
 
@@ -161,6 +160,9 @@ public class ManageUmbrella extends AppCompatActivity {
 
                     Utils.SaveUmbrellaFile(umbrellaFile, rows, getApplicationContext());
                     Toast.makeText(getApplicationContext(),"Ombrellone salvato con successo!", Toast.LENGTH_LONG).show();
+
+                    Intent myIntent = new Intent(ManageUmbrella.this, MainActivity.class);
+                    ManageUmbrella.this.startActivity(myIntent);
                 }
             }
         }

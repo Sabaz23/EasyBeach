@@ -24,9 +24,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -39,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
     private Button UmbrellaButtons[] = null;
 
     private File umbrellaFile = null;
+
+    private int rowDisplaying = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,14 +70,15 @@ public class MainActivity extends AppCompatActivity {
             rows[i].LogAllRow();
 
         //Get current Date
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN);
         Calendar c = Calendar.getInstance();
         String date = sdf.format(c.getTime());
-        String currentDate = "Data corrente: " + date.toString();
+        String currentDate = "Data corrente: " + date;
 
         //Set IDs
         spinner = findViewById(R.id.spinnermain);
         time = findViewById(R.id.tvtime);
+
 
         //Set Date
         time.setText(currentDate);
@@ -98,7 +104,8 @@ public class MainActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                Log.i(TAG, "Hai cliccato su " + adapterView.getItemAtPosition(i).toString());
+                PaintButtons(i);
+                rowDisplaying = i;
             }
 
             @Override
@@ -109,33 +116,63 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Utils.SaveUmbrellaFile(umbrellaFile,rows,getApplicationContext());
-    }
 
     private View.OnClickListener UmbrellaListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            switch (view.getId()) {
-                //TODO GET CURRENT ROW CLICKED
-                case R.id.btt0:
-                    Log.i(TAG,"Hai Cliccato su 1");
-                    if(rows[0].UmbrellaAtPosition(0).isFree()) {
-                        UmbrellaButtons[0].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.red, null));
-                        rows[0].UmbrellaAtPosition(0).setFree(false);
-                    }
-                    else
-                    {
-                        UmbrellaButtons[0].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.green, null));
-                        rows[0].UmbrellaAtPosition(0).setFree(true);
-                    }
-
+            PopUpClass popUpClass = new PopUpClass();
+            Button b = (Button)view;
+            int OmbrellaIndex = Integer.parseInt(b.getText().toString())-1; //L'ombrellone 1 ha indice 0 ad esempio
+            Umbrella u = rows[rowDisplaying].UmbrellaAtPosition(OmbrellaIndex);
+            String fila = Integer.toString(rowDisplaying+1);
+            String numeroFila = "Ombrellone numero " + b.getText() + "\nFila numero: " + fila;
+            String nomeCognome = null;
+            String tipo = "Due lettini";
+            String sd = null;
+            String fd = null;
+            if(u.getStartDate() != null) {
+                sd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).format(u.getStartDate());
+                fd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).format(u.getFinishDate());
+                sd = "Data di Arrivo: " + sd;
+                fd = "Data di Partenza: " + fd;
+            }else
+            {
+                sd = "";
+                fd = "";
             }
-        }
 
+
+            switch(u.getType())
+            {
+                case 'A':
+                    tipo = "Due lettini";
+                    break;
+                case 'B':
+                    tipo = "Lettino e sdraio";
+                    break;
+                case 'C':
+                    tipo = "Due sdraio";
+                    break;
+            }
+            if(u.isFree())
+                nomeCognome = "Questo ombrellone è attualmente libero.";
+            else
+                nomeCognome = "Nome cliente: " + u.getClientName();
+            popUpClass.showPopupWindow(view,numeroFila,nomeCognome,tipo,sd,fd);
+        }
     };
+
+
+    private void PaintButtons(int row)
+    {
+        for(int i=0; i<UmbrellaButtons.length; i++)
+        {
+            if(rows[row].UmbrellaAtPosition(i).isFree())
+                UmbrellaButtons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.green, null));
+            else
+                UmbrellaButtons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.red, null));
+        }
+    }
 
 
 
