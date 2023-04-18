@@ -2,40 +2,44 @@ package com.maiot.easybeach;
 
 import android.location.Location;
 
-import java.util.Date;
+import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
+import java.util.Calendar;
+import java.util.Date;
+@Entity
 public class Umbrella {
-    private String ClientName;
+    @PrimaryKey(autoGenerate = true)
+    private int uid;
+    @ColumnInfo @NonNull
     private int number;
+    @ColumnInfo @NonNull
     private int row;
     //A is chair+chair, B is chair+bed, C is bed+bed
+    @ColumnInfo @NonNull
     private char type;
+    @ColumnInfo @NonNull
     private boolean free;
+    @ColumnInfo
     private Location position;
-
-    private Date startDate, finishDate;
 
     public Umbrella()
     {
-        this.ClientName = null;
         this.number = 0;
         this.row = 0;
         this.type = 'A';
         this.free = true;
         this.position = null;
-        this.startDate = null;
-        this.finishDate = null;
     }
-    public Umbrella(String client, int num, int r, char t, boolean f, Location pos, Date sd, Date fd)
+    public Umbrella(int num, int r, char t, boolean f, Location pos, Reservation[] res)
     {
-        this.ClientName = client;
         this.number = num;
         this.row = r;
         this.type = t;
         this.free = f;
         this.position = pos;
-        this.startDate = sd;
-        this.finishDate = sd;
     }
 
     public int getNumber() {
@@ -58,16 +62,6 @@ public class Umbrella {
         return type;
     }
 
-    public String getClientName()
-    {
-        return this.ClientName;
-    }
-
-    public void setClientName(String clientName)
-    {
-        this.ClientName = clientName;
-    }
-
     public void setType(char type) {
         this.type = type;
     }
@@ -88,43 +82,24 @@ public class Umbrella {
         this.position = position;
     }
 
-    public Date getStartDate()
+    public Reservation[] getReservation()
     {
-        return this.startDate;
+        return this.reservation;
     }
 
-    public Date getFinishDate()
+    public void setReservation(Reservation[] res)
     {
-        return this.finishDate;
+        this.reservation = res;
     }
 
-    public void setStartDate(Date sd)
-    {
-        this.startDate = sd;
-    }
-
-    public void setFinishDate(Date fd)
-    {
-        this.finishDate = fd;
-    }
 
     public void UpdateUmbrella(Umbrella u)
     {
-        this.ClientName = u.getClientName();
         this.number = u.getNumber();
         this.row = u.getRow();
         this.type = u.getType();
         this.free = u.isFree();
         this.position = u.getPosition();
-        this.startDate = u.getStartDate();
-        this.finishDate = u.getFinishDate();
-    }
-
-    public void setUmbrellaFree()
-    {
-        this.ClientName = null;
-        this.free = true;
-        this.startDate = null;
-        this.finishDate = null;
+        this.reservation = u.getReservation();
     }
 }

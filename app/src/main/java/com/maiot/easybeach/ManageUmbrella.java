@@ -117,6 +117,7 @@ public class ManageUmbrella extends AppCompatActivity {
 
         }
         else {
+
             tvfree.setText(R.string.UMBRELLA_OCCUPIED);
             tvfree.setTextColor(Color.RED);
 
@@ -124,12 +125,15 @@ public class ManageUmbrella extends AppCompatActivity {
             etnomecognome.setText(u.getClientName());
 
             btnConfirm.setText(R.string.BUTTON_OCCUPIED);
+            Calendar c1 = Calendar.getInstance();
+            Calendar c2 = Calendar.getInstance();
+            c1.setTime(u.getStartDate());
+            c2.setTime(u.getFinishDate());
 
-            Calendar c = Calendar.getInstance();
-            c.setTime(u.getStartDate());
-            datePickerStart.updateDate(c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
-            c.setTime(u.getFinishDate());
-            datePickerFinish.updateDate(c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
+            datePickerStart.updateDate(c1.get(Calendar.YEAR),c1.get(Calendar.MONTH),c1.get(Calendar.DAY_OF_MONTH));
+            datePickerFinish.updateDate(c2.get(Calendar.YEAR),c2.get(Calendar.MONTH),c2.get(Calendar.DAY_OF_MONTH));
+
+
 
         }
 
@@ -141,30 +145,34 @@ public class ManageUmbrella extends AppCompatActivity {
         public void onClick(View view) {
             Button b = (Button)view;
             String bttText = b.getText().toString();
-            if(getString(R.string.BUTTON_FREE).equals(bttText) )
+            Calendar c1 = Calendar.getInstance();
+            Calendar c2 = Calendar.getInstance();
+
+            c1.set(datePickerStart.getYear(),datePickerStart.getMonth(),datePickerStart.getDayOfMonth());
+            c2.set(datePickerFinish.getYear(),datePickerFinish.getMonth(), datePickerFinish.getDayOfMonth());
+            u.setStartDate(c1.getTime());
+            u.setFinishDate(c2.getTime());
+
+            if(etnomecognome.getText().toString().equals(""))
+                Toast.makeText(getApplicationContext(), "Inserisci nome e cognome", Toast.LENGTH_LONG).show();
+            else if(c2.before(c1))
             {
-                if(etnomecognome.getText().toString().equals(""))
-                    Toast.makeText(getApplicationContext(), "Inserisci nome e cognome", Toast.LENGTH_LONG).show();
-                else
-                {
-                    u.setFree(false);
-                    u.setClientName(etnomecognome.getText().toString());
-
-                    Calendar c = Calendar.getInstance();
-                    c.set(datePickerStart.getYear(),datePickerStart.getMonth(),datePickerStart.getDayOfMonth());
-                    u.setStartDate(c.getTime());
-                    c.set(datePickerFinish.getYear(),datePickerFinish.getMonth(), datePickerFinish.getDayOfMonth());
-                    u.setFinishDate(c.getTime());
-
-                    rows[rNum].UmbrellaAtPosition(UmbrellaNumber).UpdateUmbrella(u);
-
-                    Utils.SaveUmbrellaFile(umbrellaFile, rows, getApplicationContext());
-                    Toast.makeText(getApplicationContext(),"Ombrellone salvato con successo!", Toast.LENGTH_LONG).show();
-
-                    Intent myIntent = new Intent(ManageUmbrella.this, MainActivity.class);
-                    ManageUmbrella.this.startActivity(myIntent);
-                }
+                Toast.makeText(getApplicationContext(), "La data di partenza non può essere prima di quella di arrivo", Toast.LENGTH_LONG).show();
             }
+            else
+            {
+
+                if(getString(R.string.BUTTON_FREE).equals(bttText)) u.setFree(false);
+
+                u.setClientName(etnomecognome.getText().toString());
+                rows[rNum].UmbrellaAtPosition(UmbrellaNumber).UpdateUmbrella(u);
+                Utils.SaveUmbrellaFile(umbrellaFile, rows, getApplicationContext());
+                Toast.makeText(getApplicationContext(),"Ombrellone salvato con successo!", Toast.LENGTH_LONG).show();
+
+                Intent myIntent = new Intent(ManageUmbrella.this, MainActivity.class);
+                ManageUmbrella.this.startActivity(myIntent);
+            }
+
         }
     };
 
@@ -178,6 +186,9 @@ public class ManageUmbrella extends AppCompatActivity {
                 rows[rNum].UmbrellaAtPosition(UmbrellaNumber).setUmbrellaFree();
                 Utils.SaveUmbrellaFile(umbrellaFile, rows, getApplicationContext());
                 Toast.makeText(getApplicationContext(), "Ombrellone liberato!", Toast.LENGTH_LONG).show();
+
+                Intent myIntent = new Intent(ManageUmbrella.this, MainActivity.class);
+                ManageUmbrella.this.startActivity(myIntent);
             }
             return true;
         }

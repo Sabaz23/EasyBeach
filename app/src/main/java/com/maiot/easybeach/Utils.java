@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -50,7 +51,6 @@ public class Utils {
         Umbrella tmp;
         ArrayList<Umbrella> tmpArray = new ArrayList<>();
         int rowNumber = 0;
-
         for(int i=0;i<Umbrellas.length;i++)
         {
             if((i % UmbrellaPerRow == 0 && i!=0) || i == Umbrellas.length - 1)
@@ -65,15 +65,15 @@ public class Utils {
                     boolean free = Boolean.parseBoolean(UmbrellaValues[4]);
                     Date sd = null;
                     Date fd = null;
-                    if(UmbrellaValues.length>5) //Se le date sono state settate
+
+                    if(UmbrellaValues.length > 5) //Se le date sono state settate
                     {
                         try
                         {
                             sd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).parse(UmbrellaValues[5]);
                             fd = new SimpleDateFormat("dd/MM/yyyy)", Locale.ITALIAN).parse(UmbrellaValues[6]);
 
-                            Log.i(TAG,"Fd " + sd);
-                            Log.i(TAG, "Sd " + fd);
+
                         }
                         catch (java.text.ParseException e) {
                             Log.e(TAG,"Problema nella lettura " + e.getMessage());
@@ -108,20 +108,26 @@ public class Utils {
                 boolean free = Boolean.parseBoolean(UmbrellaValues[4]);
                 Date sd = null;
                 Date fd = null;
+                Log.i(TAG,"Lunghezza umbrellavalues " + UmbrellaValues.length);
                 if(UmbrellaValues.length > 5)
                 {
                     try
                     {
                         sd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).parse(UmbrellaValues[5]);
                         fd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).parse(UmbrellaValues[6]);
+                        Log.i(TAG, "Data dopo parsing " + sd);
+                        Log.i(TAG, "Data dopo parsing " + fd);
+                    }catch (ParseException p)
+                    {
+                        Log.e(TAG,"Errore nel parsing " + p.getMessage());
                     }
-                    catch (java.text.ParseException e) {
-                        Log.e(TAG,"Problema nella lettura " + e.getMessage());
-                    }
+
                 }
 
                 //Creo un ombrellone temporaneo con la riga letta e lo aggiungo all'array
                 tmp = new Umbrella(name, UmbrellaNum, rowNumber, TypeOfUmbrella, free, null,sd,fd);
+                Log.i(TAG, "Data in tmpUmb " + tmp.getStartDate() );
+                Log.i(TAG, "Data in tmpUmb " + tmp.getFinishDate() );
                 tmpArray.add(tmp);
             }
         }
