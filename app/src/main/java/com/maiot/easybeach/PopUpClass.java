@@ -13,7 +13,7 @@ public class PopUpClass {
 
     //PopupWindow display method
 
-    public void showPopupWindow(final View view,String NumeroFila, String NomeCognome, String tipo, String sd, String fd) {
+    public void showPopupWindow(final View view,String NumeroFila, String NomeCognome, String tipo) {
 
 
         //Create a View object yourself through inflater
@@ -35,16 +35,12 @@ public class PopUpClass {
         //Initialize the elements of our window, install the handler
         TextView tvpopupnome = popupView.findViewById(R.id.tvpopupnome);
         TextView tvpopupnumeroefila = popupView.findViewById(R.id.tvpopupnumeroefila);
-        TextView tvpopuppartenza = popupView.findViewById(R.id.tvpopuppartenza);
-        TextView tvpopuparrivo = popupView.findViewById(R.id.tvpopuparrivo);
         TextView tvpopuptipo = popupView.findViewById(R.id.tvpopuptipo);
 
         //Set the textviews
         tvpopupnome.setText(NomeCognome);
         tvpopupnumeroefila.setText(NumeroFila);
         tvpopuptipo.setText(tipo);
-        tvpopuppartenza.setText(fd);
-        tvpopuparrivo.setText(sd);
 
         //Handler for clicking on the inactive zone of the window
 

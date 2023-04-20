@@ -59,28 +59,16 @@ public class Utils {
                 {
                     UmbrellaValues = Umbrellas[i].split(",");
                     //Variabili per inizializzare UmbrellaTmp
-                    String name = UmbrellaValues[0];
-                    int UmbrellaNum = Integer.parseInt(UmbrellaValues[1]);
-                    char TypeOfUmbrella = UmbrellaValues[3].charAt(0);
-                    boolean free = Boolean.parseBoolean(UmbrellaValues[4]);
-                    Date sd = null;
-                    Date fd = null;
-
-                    if(UmbrellaValues.length > 5) //Se le date sono state settate
+                    int UmbrellaNum = Integer.parseInt(UmbrellaValues[0]);
+                    char TypeOfUmbrella = UmbrellaValues[2].charAt(0);
+                    boolean free = Boolean.parseBoolean(UmbrellaValues[3]);
+                    String token = null;
+                    if(!free) //Se non è libero, esiste un token associato
                     {
-                        try
-                        {
-                            sd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).parse(UmbrellaValues[5]);
-                            fd = new SimpleDateFormat("dd/MM/yyyy)", Locale.ITALIAN).parse(UmbrellaValues[6]);
-
-
-                        }
-                        catch (java.text.ParseException e) {
-                            Log.e(TAG,"Problema nella lettura " + e.getMessage());
-                        }
+                        token = UmbrellaValues[4].toString();
                     }
                     //Creo un ombrellone temporaneo con la riga letta e lo aggiungo all'array
-                    tmp = new Umbrella(name, UmbrellaNum, rowNumber, TypeOfUmbrella, free,null,sd,fd);
+                    tmp = new Umbrella(UmbrellaNum, rowNumber, TypeOfUmbrella, free, token);
                     tmpArray.add(tmp);
                 }
 
@@ -102,32 +90,17 @@ public class Utils {
                 UmbrellaValues = Umbrellas[i].split(",");
 
                 //Variabili per inizializzare UmbrellaTmp
-                String name = UmbrellaValues[0];
-                int UmbrellaNum = Integer.parseInt(UmbrellaValues[1]);
-                char TypeOfUmbrella = UmbrellaValues[3].charAt(0);
-                boolean free = Boolean.parseBoolean(UmbrellaValues[4]);
-                Date sd = null;
-                Date fd = null;
-                Log.i(TAG,"Lunghezza umbrellavalues " + UmbrellaValues.length);
-                if(UmbrellaValues.length > 5)
+                int UmbrellaNum = Integer.parseInt(UmbrellaValues[0]);
+                char TypeOfUmbrella = UmbrellaValues[2].charAt(0);
+                boolean free = Boolean.parseBoolean(UmbrellaValues[3]);
+                String token = null;
+                if(!free)
                 {
-                    try
-                    {
-                        sd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).parse(UmbrellaValues[5]);
-                        fd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).parse(UmbrellaValues[6]);
-                        Log.i(TAG, "Data dopo parsing " + sd);
-                        Log.i(TAG, "Data dopo parsing " + fd);
-                    }catch (ParseException p)
-                    {
-                        Log.e(TAG,"Errore nel parsing " + p.getMessage());
-                    }
-
+                    token = UmbrellaValues[4].toString();
                 }
 
                 //Creo un ombrellone temporaneo con la riga letta e lo aggiungo all'array
-                tmp = new Umbrella(name, UmbrellaNum, rowNumber, TypeOfUmbrella, free, null,sd,fd);
-                Log.i(TAG, "Data in tmpUmb " + tmp.getStartDate() );
-                Log.i(TAG, "Data in tmpUmb " + tmp.getFinishDate() );
+                tmp = new Umbrella(UmbrellaNum, rowNumber, TypeOfUmbrella, free, token);
                 tmpArray.add(tmp);
             }
         }
@@ -148,20 +121,13 @@ public class Utils {
             {
                 for(int j=0;j<UmbrellaPerRow;j++) {
                     Log.i(TAG, "Controllo la fila " + i + " e l'ombrellone " + j);
-                    dataToWrite = (data[i].UmbrellaAtPosition(j).getClientName() + "," +
-                            data[i].UmbrellaAtPosition(j).getNumber() + "," +
+                    dataToWrite = (data[i].UmbrellaAtPosition(j).getNumber() + "," +
                             data[i].UmbrellaAtPosition(j).getRow() + "," +
                             data[i].UmbrellaAtPosition(j).getType() + "," +
                             data[i].UmbrellaAtPosition(j).isFree());
-                    if(data[i].UmbrellaAtPosition(j).getStartDate() != null)
+                    if(data[i].UmbrellaAtPosition(j).getToken() != null)
                     {
-                        String sd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).format(data[i].UmbrellaAtPosition(j).getStartDate());
-                        String fd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).format(data[i].UmbrellaAtPosition(j).getFinishDate());
-
-
-                        byteToWrite = (dataToWrite + "," + sd + "," +
-                                fd + "\n").getBytes(StandardCharsets.UTF_8);
-
+                        byteToWrite = (dataToWrite + "," + data[i].UmbrellaAtPosition(j).getToken() + "\n").getBytes(StandardCharsets.UTF_8);
                     }else
                     {
                         byteToWrite = (dataToWrite + "\n").getBytes(StandardCharsets.UTF_8);
@@ -178,6 +144,11 @@ public class Utils {
             Log.e(TAG, "Errore durante la scrittura: " + e.getMessage());
         }
     }
+
+    //Per semplicità la prima volta che installiamo l'app generiamo la mappa degli
+    //ombrelloni casualmente. Questo metodo non sarebbe applicato anche in un contesto
+    //reale, ma andrebbe fatto manualmente basandosi su degli input da parte dell'
+    //utilizzatore.
 
     public static Row[] PopulateRowsFirstTime(File filename, Context appContext)
     {
@@ -196,16 +167,14 @@ public class Utils {
                 if(i == TotalUmbrellas - 1)
                 {
                     Random r = new Random();
-                    u = new Umbrella(null, umbrellaNumber, rowNumber, UmbrellaTypes.charAt(r.nextInt(UmbrellaTypes.length())),
-                            true,null,null,null);
+                    u = new Umbrella(umbrellaNumber, rowNumber, UmbrellaTypes.charAt(r.nextInt(UmbrellaTypes.length())),
+                            true,null);
                     uArr.add(u);
 
                 }
 
                 Umbrella[] UmbArray = new Umbrella[uArr.size()];
                 uArr.toArray(UmbArray);
-
-
 
                 rows.add(new Row(UmbArray, rowNumber));
 
@@ -219,8 +188,9 @@ public class Utils {
             if( i != TotalUmbrellas -1)
             {
                 Random r = new Random();
-                u = new Umbrella(null, umbrellaNumber, rowNumber, UmbrellaTypes.charAt(r.nextInt(UmbrellaTypes.length())),
-                        true,null,null,null);
+                u = new Umbrella(umbrellaNumber, rowNumber,
+                        UmbrellaTypes.charAt(r.nextInt(UmbrellaTypes.length())),
+                        true,null);
 
                 uArr.add(u);
 

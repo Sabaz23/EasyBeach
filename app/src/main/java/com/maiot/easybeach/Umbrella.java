@@ -4,26 +4,18 @@ import android.location.Location;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
-import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import java.util.Calendar;
 import java.util.Date;
-@Entity
 public class Umbrella {
-    @PrimaryKey(autoGenerate = true)
-    private int uid;
-    @ColumnInfo @NonNull
     private int number;
-    @ColumnInfo @NonNull
     private int row;
     //A is chair+chair, B is chair+bed, C is bed+bed
-    @ColumnInfo @NonNull
     private char type;
-    @ColumnInfo @NonNull
     private boolean free;
-    @ColumnInfo
-    private Location position;
+
+    private String token;
 
     public Umbrella()
     {
@@ -31,15 +23,13 @@ public class Umbrella {
         this.row = 0;
         this.type = 'A';
         this.free = true;
-        this.position = null;
     }
-    public Umbrella(int num, int r, char t, boolean f, Location pos, Reservation[] res)
+    public Umbrella(int num, int r, char t, boolean f, String token)
     {
         this.number = num;
         this.row = r;
         this.type = t;
         this.free = f;
-        this.position = pos;
     }
 
     public int getNumber() {
@@ -74,24 +64,15 @@ public class Umbrella {
         this.free = free;
     }
 
-    public Location getPosition() {
-        return position;
-    }
-
-    public void setPosition(Location position) {
-        this.position = position;
-    }
-
-    public Reservation[] getReservation()
+    public void setToken(String token)
     {
-        return this.reservation;
+        this.token = token;
     }
 
-    public void setReservation(Reservation[] res)
+    public String getToken()
     {
-        this.reservation = res;
+        return this.token;
     }
-
 
     public void UpdateUmbrella(Umbrella u)
     {
@@ -99,7 +80,5 @@ public class Umbrella {
         this.row = u.getRow();
         this.type = u.getType();
         this.free = u.isFree();
-        this.position = u.getPosition();
-        this.reservation = u.getReservation();
     }
 }

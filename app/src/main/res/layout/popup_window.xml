@@ -38,25 +38,6 @@
         android:textSize="22sp"
         android:textColor="@color/black"/>
 
-    <TextView
-        android:id="@+id/tvpopuparrivo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:textAlignment="center"
-        android:text=""
-        android:textSize="22sp"
-        android:textColor="@color/black"/>
-
-    <TextView
-        android:id="@+id/tvpopuppartenza"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:textAlignment="center"
-        android:text=""
-        android:textSize="22sp"
-        android:textColor="@color/black"/>
 
 
 

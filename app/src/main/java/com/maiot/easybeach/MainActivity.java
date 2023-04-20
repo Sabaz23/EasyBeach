@@ -4,9 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +20,8 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -32,7 +37,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private Row rows[] = null;
+    private Row[] rows = null;
 
     private static final int UMBRELLANUMBER = 12;
     private TextView time = null;
@@ -49,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if(!haveNetworkConnection())
+        {
+            Toast.makeText(getApplicationContext(), "La mappa potrebbe non essere aggiornata senza internet.", Toast.LENGTH_LONG).show();
+        }
         String filePath = getApplicationContext().getFilesDir().getPath().toString()
                 + "/" + getString(R.string.UMBRELLA_FILENAME);
 
@@ -128,19 +137,6 @@ public class MainActivity extends AppCompatActivity {
             String numeroFila = "Ombrellone numero " + b.getText() + "\nFila numero: " + fila;
             String nomeCognome = null;
             String tipo = "Due lettini";
-            String sd = null;
-            String fd = null;
-            if(u.getStartDate() != null) {
-                sd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).format(u.getStartDate());
-                fd = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN).format(u.getFinishDate());
-                sd = "Data di Arrivo: " + sd;
-                fd = "Data di Partenza: " + fd;
-            }else
-            {
-                sd = "";
-                fd = "";
-            }
-
 
             switch(u.getType())
             {
@@ -157,11 +153,27 @@ public class MainActivity extends AppCompatActivity {
             if(u.isFree())
                 nomeCognome = "Questo ombrellone è attualmente libero.";
             else
-                nomeCognome = "Nome cliente: " + u.getClientName();
-            popUpClass.showPopupWindow(view,numeroFila,nomeCognome,tipo,sd,fd);
+                nomeCognome = "Questo ombrellone è attualmente occupato.";
+            popUpClass.showPopupWindow(view,numeroFila,nomeCognome,tipo);
         }
     };
 
+    private boolean haveNetworkConnection() {
+        boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+                if (ni.isConnected())
+                    haveConnectedWifi = true;
+            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+        return haveConnectedWifi || haveConnectedMobile;
+    }
 
     private void PaintButtons(int row)
     {

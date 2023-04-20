@@ -99,43 +99,6 @@ public class ManageUmbrella extends AppCompatActivity {
 
     void FillView()
     {
-        u = rows[rNum].UmbrellaAtPosition(UmbrellaNumber);
-
-        //Coloriamo il testo in base alla disponibilità dell'ombrellone
-        if(u.isFree()) {
-            tvfree.setText(R.string.UMBRELLA_FREE);
-            tvfree.setTextColor(Color.GREEN);
-
-            tvinseriscidati.setText(R.string.HEADER_FREE);
-
-            btnConfirm.setText(R.string.BUTTON_FREE);
-
-            Calendar c = Calendar.getInstance();
-            datePickerStart.updateDate(c.get(Calendar.YEAR),c.get(Calendar.MONTH),c.get(Calendar.DAY_OF_MONTH));
-            datePickerStart.setMinDate(c.getTimeInMillis());
-            datePickerFinish.setMinDate(c.getTimeInMillis());
-
-        }
-        else {
-
-            tvfree.setText(R.string.UMBRELLA_OCCUPIED);
-            tvfree.setTextColor(Color.RED);
-
-            tvinseriscidati.setText(R.string.HEADER_OCCUPIED);
-            etnomecognome.setText(u.getClientName());
-
-            btnConfirm.setText(R.string.BUTTON_OCCUPIED);
-            Calendar c1 = Calendar.getInstance();
-            Calendar c2 = Calendar.getInstance();
-            c1.setTime(u.getStartDate());
-            c2.setTime(u.getFinishDate());
-
-            datePickerStart.updateDate(c1.get(Calendar.YEAR),c1.get(Calendar.MONTH),c1.get(Calendar.DAY_OF_MONTH));
-            datePickerFinish.updateDate(c2.get(Calendar.YEAR),c2.get(Calendar.MONTH),c2.get(Calendar.DAY_OF_MONTH));
-
-
-
-        }
 
     }
 
@@ -143,35 +106,6 @@ public class ManageUmbrella extends AppCompatActivity {
 
         @Override
         public void onClick(View view) {
-            Button b = (Button)view;
-            String bttText = b.getText().toString();
-            Calendar c1 = Calendar.getInstance();
-            Calendar c2 = Calendar.getInstance();
-
-            c1.set(datePickerStart.getYear(),datePickerStart.getMonth(),datePickerStart.getDayOfMonth());
-            c2.set(datePickerFinish.getYear(),datePickerFinish.getMonth(), datePickerFinish.getDayOfMonth());
-            u.setStartDate(c1.getTime());
-            u.setFinishDate(c2.getTime());
-
-            if(etnomecognome.getText().toString().equals(""))
-                Toast.makeText(getApplicationContext(), "Inserisci nome e cognome", Toast.LENGTH_LONG).show();
-            else if(c2.before(c1))
-            {
-                Toast.makeText(getApplicationContext(), "La data di partenza non può essere prima di quella di arrivo", Toast.LENGTH_LONG).show();
-            }
-            else
-            {
-
-                if(getString(R.string.BUTTON_FREE).equals(bttText)) u.setFree(false);
-
-                u.setClientName(etnomecognome.getText().toString());
-                rows[rNum].UmbrellaAtPosition(UmbrellaNumber).UpdateUmbrella(u);
-                Utils.SaveUmbrellaFile(umbrellaFile, rows, getApplicationContext());
-                Toast.makeText(getApplicationContext(),"Ombrellone salvato con successo!", Toast.LENGTH_LONG).show();
-
-                Intent myIntent = new Intent(ManageUmbrella.this, MainActivity.class);
-                ManageUmbrella.this.startActivity(myIntent);
-            }
 
         }
     };
@@ -179,17 +113,6 @@ public class ManageUmbrella extends AppCompatActivity {
     private View.OnLongClickListener bttLongClick = new View.OnLongClickListener() {
         @Override
         public boolean onLongClick(View view) {
-            Button b = (Button)view;
-            //Se il testo è = a quello del bottone occupato (Quindi l'ombrellone è occupato)
-            if(b.getText().toString().equals(getString(R.string.BUTTON_OCCUPIED)))
-            {
-                rows[rNum].UmbrellaAtPosition(UmbrellaNumber).setUmbrellaFree();
-                Utils.SaveUmbrellaFile(umbrellaFile, rows, getApplicationContext());
-                Toast.makeText(getApplicationContext(), "Ombrellone liberato!", Toast.LENGTH_LONG).show();
-
-                Intent myIntent = new Intent(ManageUmbrella.this, MainActivity.class);
-                ManageUmbrella.this.startActivity(myIntent);
-            }
             return true;
         }
     };
