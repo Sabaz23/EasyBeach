@@ -1,15 +1,6 @@
 <resources>
     <string name="app_name">Easy Beach</string>
 
-    <!-- Stringhe per lo spinner in MainActivity -->
-
-    <string-array name="SpinnerMainOptions">
-        <item>Prima Fila</item>
-        <item>Seconda fila</item>
-        <item>Terza Fila</item>
-        <item>Quarta Fila</item>
-    </string-array>
-
     <!-- Stringhe per Activity ManageUmbrella -->
 
     <string name="UMBRELLA_FREE">LIBERO</string>
@@ -24,6 +15,7 @@
     <!-- Stringhe Utili -->
 
     <string name="UMBRELLA_FILENAME">umbrellas</string>
+    <string name="MAP_FILENAME">map</string>
 
 
 </resources>

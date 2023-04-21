@@ -12,8 +12,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.webkit.ValueCallback;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -23,9 +26,14 @@ import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -37,7 +45,6 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private Row[] rows = null;
 
     private static final int UMBRELLANUMBER = 12;
     private TextView time = null;
@@ -46,6 +53,12 @@ public class MainActivity extends AppCompatActivity {
     private Button UmbrellaButtons[] = null;
 
     private File umbrellaFile = null;
+    private File mapFile = null;
+
+    private Umbrella[] umbrellas = null;
+
+    private JSONArray FetchedMap = null;
+    private JSONArray oldMap = null;
 
     private int rowDisplaying = 0;
 
@@ -54,29 +67,34 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         if(!haveNetworkConnection())
-        {
             Toast.makeText(getApplicationContext(), "La mappa potrebbe non essere aggiornata senza internet.", Toast.LENGTH_LONG).show();
-        }
+
         String filePath = getApplicationContext().getFilesDir().getPath().toString()
                 + "/" + getString(R.string.UMBRELLA_FILENAME);
 
+        String mapPath = getApplicationContext().getFilesDir().getPath().toString()
+                + "/" + getString(R.string.MAP_FILENAME);
+
         umbrellaFile = new File(filePath);
-        //umbrellaFile.delete();
+        mapFile = new File(mapPath);
+
+
+        Thread FetchUmbrellas = new Thread(this::CheckAndUpdateMap);
+
+
+
+
+        umbrellaFile.delete();
         Log.i(TAG, "Esiste " + umbrellaFile.exists() + filePath);
         if(umbrellaFile.exists())
-        {
-            rows = Utils.LoadUmbrellaFile(umbrellaFile,getApplicationContext());
-        }
-        else {
-            rows = Utils.PopulateRowsFirstTime(umbrellaFile, getApplicationContext());
-        }
-
+            umbrellas = Utils.LoadUmbrellaFile(umbrellaFile,getApplicationContext());
+        else
+            umbrellas = Utils.PopulateRowsFirstTime(umbrellaFile, getApplicationContext());
 
         Log.i(TAG, "Ombrelloni caricati.");
 
-        for(int i=0;i<rows.length;i++)
-            rows[i].LogAllRow();
 
         //Get current Date
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN);
@@ -84,17 +102,35 @@ public class MainActivity extends AppCompatActivity {
         String date = sdf.format(c.getTime());
         String currentDate = "Data corrente: " + date;
 
-        //Set IDs
-        spinner = findViewById(R.id.spinnermain);
+        //Set ID
         time = findViewById(R.id.tvtime);
-
 
         //Set Date
         time.setText(currentDate);
 
         //Set UmbrellaButtons array
-        UmbrellaButtons = new Button[]{findViewById(R.id.btt0),findViewById(R.id.btt1),findViewById(R.id.btt2),findViewById(R.id.btt3),findViewById(R.id.btt4),findViewById(R.id.btt5),
-                findViewById(R.id.btt6),findViewById(R.id.btt7),findViewById(R.id.btt8),findViewById(R.id.btt9),findViewById(R.id.btt10),findViewById(R.id.btt11)};
+        UmbrellaButtons = new Button[]{findViewById(R.id.btt0),findViewById(R.id.btt1),
+                findViewById(R.id.btt2),findViewById(R.id.btt3),findViewById(R.id.btt4),
+                findViewById(R.id.btt5), findViewById(R.id.btt6),findViewById(R.id.btt7),
+                findViewById(R.id.btt8),findViewById(R.id.btt9),findViewById(R.id.btt10),
+                findViewById(R.id.btt11)};
+
+        //Start Thread to fetch umbrella map and update colors
+        FetchUmbrellas.start();
+
+        //Create Handler to check the map every 5 seconds
+        Handler handler = new Handler();
+        int delay = 5000;
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {CheckAndUpdateMap();}
+                }).start();
+            }
+        }, delay);
 
         //Set listeners
         for(int i=0;i<UMBRELLANUMBER;i++)
@@ -102,60 +138,36 @@ public class MainActivity extends AppCompatActivity {
             UmbrellaButtons[i].setOnClickListener(UmbrellaListener);
         }
 
-
-
-        //Populate spinner
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.SpinnerMainOptions, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                PaintButtons(i);
-                rowDisplaying = i;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                Log.i(TAG, "Nulla di selezionato");
-            }
-
-        });
     }
 
 
-    private View.OnClickListener UmbrellaListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            PopUpClass popUpClass = new PopUpClass();
-            Button b = (Button)view;
-            int OmbrellaIndex = Integer.parseInt(b.getText().toString())-1; //L'ombrellone 1 ha indice 0 ad esempio
-            Umbrella u = rows[rowDisplaying].UmbrellaAtPosition(OmbrellaIndex);
-            String fila = Integer.toString(rowDisplaying+1);
-            String numeroFila = "Ombrellone numero " + b.getText() + "\nFila numero: " + fila;
-            String nomeCognome = null;
-            String tipo = "Due lettini";
+    private View.OnClickListener UmbrellaListener = view -> {
+        PopUpClass popUpClass = new PopUpClass();
+        Button b = (Button)view;
+        int OmbrellaIndex = Integer.parseInt(b.getText().toString());
+        Umbrella u = umbrellas[OmbrellaIndex-1];
+        String numeroFila = "Ombrellone numero " + b.getText();
+        String header = null;
+        String tipo = "Due lettini";
 
-            switch(u.getType())
-            {
-                case 'A':
-                    tipo = "Due lettini";
-                    break;
-                case 'B':
-                    tipo = "Lettino e sdraio";
-                    break;
-                case 'C':
-                    tipo = "Due sdraio";
-                    break;
-            }
-            if(u.isFree())
-                nomeCognome = "Questo ombrellone è attualmente libero.";
-            else
-                nomeCognome = "Questo ombrellone è attualmente occupato.";
-            popUpClass.showPopupWindow(view,numeroFila,nomeCognome,tipo);
+        switch(u.getType())
+        {
+            case 'A':
+                tipo = "Due lettini";
+                break;
+            case 'B':
+                tipo = "Lettino e sdraio";
+                break;
+            case 'C':
+                tipo = "Due sdraio";
+                break;
         }
+
+        if(u.isFree())
+            header = "Questo ombrellone è attualmente libero.";
+        else
+            header = "Questo ombrellone è attualmente occupato.";
+        popUpClass.showPopupWindow(view,numeroFila,header,tipo);
     };
 
     private boolean haveNetworkConnection() {
@@ -175,16 +187,69 @@ public class MainActivity extends AppCompatActivity {
         return haveConnectedWifi || haveConnectedMobile;
     }
 
-    private void PaintButtons(int row)
+    private void PaintButtons()
     {
         for(int i=0; i<UmbrellaButtons.length; i++)
         {
-            if(rows[row].UmbrellaAtPosition(i).isFree())
+            if(umbrellas[i].isFree())
                 UmbrellaButtons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.green, null));
             else
                 UmbrellaButtons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.red, null));
         }
     }
+
+
+    private void CheckAndUpdateMap()
+    {
+        try {
+            FetchedMap = Utils.TestFetch();
+            Log.i(TAG, "Controllo la mappa da remoto...");
+            if(mapFile.exists()) {
+                Log.i(TAG, "La mappa esiste...");
+                oldMap = new JSONArray(Utils.ReadFile(getApplicationContext(), mapFile));
+            }
+            else {
+                Log.i(TAG, "La mappa non esiste...");
+                oldMap = FetchedMap;
+                SaveNewMap();
+            }
+
+            if(!FetchedMap.equals(oldMap))
+            {
+                Log.i(TAG, "La mappa non è uguale...aggiorno");
+                SaveNewMap();
+                UpdateColors(FetchedMap, UmbrellaButtons);
+            }
+
+        } catch (IOException | JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void UpdateColors(JSONArray map, Button[] buttons) throws JSONException {
+        int index = 0;
+        for(int i=0;i<UMBRELLANUMBER;i++)
+        {
+            if(map.getJSONObject(i) != null)
+                buttons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.green, null));
+            else
+                buttons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.red, null));
+        }
+    }
+
+    private void SaveNewMap() throws IOException, JSONException {
+        FileOutputStream fos = getApplicationContext().openFileOutput(mapFile.getName(), Context.MODE_PRIVATE);
+        byte[] byteToWrite;
+        byteToWrite = "[".getBytes(StandardCharsets.UTF_8);
+        for(int i=0;i<FetchedMap.length();i++)
+        {
+            if(i != FetchedMap.length()-1) byteToWrite = (byteToWrite + FetchedMap.getString(i) + ",").getBytes(StandardCharsets.UTF_8);
+        }
+        byteToWrite = (byteToWrite + FetchedMap.getString(FetchedMap.length()-1) + "]").getBytes(StandardCharsets.UTF_8);
+        fos.write(byteToWrite);
+        Log.i(TAG, "Ho scritto sul file " + Utils.ReadFile(getApplicationContext(),mapFile));
+    }
+
 
 
 

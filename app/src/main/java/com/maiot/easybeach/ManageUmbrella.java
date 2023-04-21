@@ -44,7 +44,6 @@ public class ManageUmbrella extends AppCompatActivity {
     private int UmbrellaNumber = 0;
 
     private Umbrella u = null;
-    private Row[] rows = null;
 
     File umbrellaFile = null;
 
@@ -55,11 +54,6 @@ public class ManageUmbrella extends AppCompatActivity {
         String filePath = getApplicationContext().getFilesDir().getPath().toString()
                 + "/" + getString(R.string.UMBRELLA_FILENAME);
         umbrellaFile = new File(filePath);
-
-        if(umbrellaFile.exists())
-            rows = Utils.LoadUmbrellaFile(umbrellaFile,getApplicationContext());
-        else
-            rows = Utils.PopulateRowsFirstTime(umbrellaFile, getApplicationContext());
 
 
         tvfree = findViewById(R.id.tvfree);
@@ -73,7 +67,6 @@ public class ManageUmbrella extends AppCompatActivity {
         btnConfirm.setOnLongClickListener(bttLongClick);
 
         ParseNfcMessage(this.getIntent());
-        FillView();
     }
 
 
@@ -97,10 +90,6 @@ public class ManageUmbrella extends AppCompatActivity {
         UmbrellaNumber = Integer.parseInt(splittedString[1]);
     }
 
-    void FillView()
-    {
-
-    }
 
     private View.OnClickListener BttListener = new View.OnClickListener(){
 
