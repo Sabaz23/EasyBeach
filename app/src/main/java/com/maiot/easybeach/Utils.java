@@ -1,6 +1,8 @@
 package com.maiot.easybeach;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -14,6 +16,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Random;
@@ -26,16 +30,24 @@ public class Utils {
     private static final String TAG = "Utils";
     private static final int TotalUmbrellas = 12;
 
-    private final static String ServerURL = "http://192.168.1.186/umbrellaapp/fetch_map.php";
+    private final static String FetchMapUrl = "http://192.168.1.186/umbrellaapp/fetch_map.php";
+    public final static String ServerUrl = "http://192.168.1.186/";
 
     public static JSONArray TestFetch() throws  IOException{
-        final OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder().url(ServerURL).build();
+        //Controlla se riesce a connettersi al server dove si trova il file della mappa
+        if(isConnectedToThisServer(ServerUrl,1000)) {
+            final OkHttpClient client = new OkHttpClient();
 
-        try (Response response = client.newCall(request).execute()){
-            return new JSONArray(response.body().string());
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+            //Crea la richiesta e prova a prenderne il body (il file php ritorna un file json)
+            Request request = new Request.Builder().url(FetchMapUrl).build();
+            try (Response response = client.newCall(request).execute()) {
+                return new JSONArray(response.body().string());
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        }else {
+            //Se non riesce a connettersi, ritorna null
+            return null;
         }
     }
 
@@ -52,14 +64,13 @@ public class Utils {
             UmbrellaValues = Umbrellas[i].split(",");
 
             //Variabili per inizializzare UmbrellaTmp
-            int UmbrellaNum = Integer.parseInt(UmbrellaValues[0]);
-            char TypeOfUmbrella = UmbrellaValues[2].charAt(0);
-            boolean free = Boolean.parseBoolean(UmbrellaValues[3]);
+            char TypeOfUmbrella = UmbrellaValues[0].charAt(0);
+            boolean free = Boolean.parseBoolean(UmbrellaValues[1]);
             String token = null;
 
             //Se non è libero, esiste un token associato
             if(!free)
-                token = UmbrellaValues[4];
+                token = UmbrellaValues[2];
 
             //Creo un ombrellone temporaneo con la riga letta e lo aggiungo all'array
             tmp = new Umbrella(i+1, TypeOfUmbrella, free, token);
@@ -138,14 +149,30 @@ public class Utils {
         StringBuilder stringBuilder = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
             String line = reader.readLine();
-            while (line != null) {
-                stringBuilder.append(line).append("\n");
-                line = reader.readLine();
-            }
+            stringBuilder.append(line);
+            do{
+                line= reader.readLine();
+                if(line != null)
+                    stringBuilder.append("\n").append(line);
+            }while(line != null);
         } catch (IOException e) {
             Log.e(TAG,"Errore nell'apertura del file " + e.getMessage());
         }
         return stringBuilder.toString();
     }
+
+    public static boolean isConnectedToThisServer(String url, int timeout) {
+        try{
+            URL myUrl = new URL(url);
+            URLConnection connection = myUrl.openConnection();
+            connection.setConnectTimeout(timeout);
+            connection.connect();
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG,"Errore nella connessione : " + e);
+            return false;
+        }
+    }
+
 
 }

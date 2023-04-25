@@ -42,6 +42,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -53,14 +55,12 @@ public class MainActivity extends AppCompatActivity {
     private Button UmbrellaButtons[] = null;
 
     private File umbrellaFile = null;
-    private File mapFile = null;
 
     private Umbrella[] umbrellas = null;
 
     private JSONArray FetchedMap = null;
     private JSONArray oldMap = null;
 
-    private int rowDisplaying = 0;
 
 
     @Override
@@ -68,25 +68,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(!haveNetworkConnection())
-            Toast.makeText(getApplicationContext(), "La mappa potrebbe non essere aggiornata senza internet.", Toast.LENGTH_LONG).show();
+        Thread checkConnection = new Thread(() -> {
+            if(!Utils.isConnectedToThisServer(Utils.ServerUrl, 1000))
+                Toast.makeText(getApplicationContext(), "Problema di connessione.", Toast.LENGTH_LONG).show();
+        });
+
+        checkConnection.start();
 
         String filePath = getApplicationContext().getFilesDir().getPath().toString()
                 + "/" + getString(R.string.UMBRELLA_FILENAME);
 
-        String mapPath = getApplicationContext().getFilesDir().getPath().toString()
-                + "/" + getString(R.string.MAP_FILENAME);
-
         umbrellaFile = new File(filePath);
-        mapFile = new File(mapPath);
 
-
-        Thread FetchUmbrellas = new Thread(this::CheckAndUpdateMap);
-
-
-
-
-        umbrellaFile.delete();
         Log.i(TAG, "Esiste " + umbrellaFile.exists() + filePath);
         if(umbrellaFile.exists())
             umbrellas = Utils.LoadUmbrellaFile(umbrellaFile,getApplicationContext());
@@ -115,22 +108,16 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.btt8),findViewById(R.id.btt9),findViewById(R.id.btt10),
                 findViewById(R.id.btt11)};
 
-        //Start Thread to fetch umbrella map and update colors
-        FetchUmbrellas.start();
 
-        //Create Handler to check the map every 5 seconds
-        Handler handler = new Handler();
-        int delay = 5000;
-
-        handler.postDelayed(new Runnable() {
-            @Override
+        //Crea un nuovo thread per aggiornare la mappa ogni minuto
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask()
+        {
             public void run() {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {CheckAndUpdateMap();}
-                }).start();
+                UpdateMap();
             }
-        }, delay);
+        }, 0, 60*1000);
+
 
         //Set listeners
         for(int i=0;i<UMBRELLANUMBER;i++)
@@ -170,56 +157,21 @@ public class MainActivity extends AppCompatActivity {
         popUpClass.showPopupWindow(view,numeroFila,header,tipo);
     };
 
-    private boolean haveNetworkConnection() {
-        boolean haveConnectedWifi = false;
-        boolean haveConnectedMobile = false;
-
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
-        for (NetworkInfo ni : netInfo) {
-            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
-                if (ni.isConnected())
-                    haveConnectedWifi = true;
-            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
-                if (ni.isConnected())
-                    haveConnectedMobile = true;
-        }
-        return haveConnectedWifi || haveConnectedMobile;
-    }
-
-    private void PaintButtons()
-    {
-        for(int i=0; i<UmbrellaButtons.length; i++)
-        {
-            if(umbrellas[i].isFree())
-                UmbrellaButtons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.green, null));
-            else
-                UmbrellaButtons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.red, null));
-        }
-    }
-
-
-    private void CheckAndUpdateMap()
+    private void UpdateMap()
     {
         try {
-            FetchedMap = Utils.TestFetch();
-            Log.i(TAG, "Controllo la mappa da remoto...");
-            if(mapFile.exists()) {
-                Log.i(TAG, "La mappa esiste...");
-                oldMap = new JSONArray(Utils.ReadFile(getApplicationContext(), mapFile));
+            JSONArray tmp = Utils.TestFetch();
+            if(tmp != null) {
+                FetchedMap = tmp;
+                Log.i(TAG, "Mappa fetchata!");
             }
             else {
-                Log.i(TAG, "La mappa non esiste...");
-                oldMap = FetchedMap;
-                SaveNewMap();
+                Toast.makeText(getApplicationContext(), "Non sono riuscito a aggiornare la mappa", Toast.LENGTH_LONG).show();
+                Log.i(TAG, "Non sono riuscito a prendere la mappa...");
+                return;
             }
 
-            if(!FetchedMap.equals(oldMap))
-            {
-                Log.i(TAG, "La mappa non è uguale...aggiorno");
-                SaveNewMap();
-                UpdateColors(FetchedMap, UmbrellaButtons);
-            }
+            UpdateColors(FetchedMap, UmbrellaButtons);
 
         } catch (IOException | JSONException e) {
             throw new RuntimeException(e);
@@ -230,27 +182,16 @@ public class MainActivity extends AppCompatActivity {
         int index = 0;
         for(int i=0;i<UMBRELLANUMBER;i++)
         {
-            if(map.getJSONObject(i) != null)
+            if(map.getJSONObject(i).getString("token").equals("null")) {
                 buttons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.green, null));
-            else
+                umbrellas[i].setFree(true);
+            }
+            else {
                 buttons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.red, null));
+                umbrellas[i].setFree(false);
+            }
         }
     }
-
-    private void SaveNewMap() throws IOException, JSONException {
-        FileOutputStream fos = getApplicationContext().openFileOutput(mapFile.getName(), Context.MODE_PRIVATE);
-        byte[] byteToWrite;
-        byteToWrite = "[".getBytes(StandardCharsets.UTF_8);
-        for(int i=0;i<FetchedMap.length();i++)
-        {
-            if(i != FetchedMap.length()-1) byteToWrite = (byteToWrite + FetchedMap.getString(i) + ",").getBytes(StandardCharsets.UTF_8);
-        }
-        byteToWrite = (byteToWrite + FetchedMap.getString(FetchedMap.length()-1) + "]").getBytes(StandardCharsets.UTF_8);
-        fos.write(byteToWrite);
-        Log.i(TAG, "Ho scritto sul file " + Utils.ReadFile(getApplicationContext(),mapFile));
-    }
-
-
 
 
 }
