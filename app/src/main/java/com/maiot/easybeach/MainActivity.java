@@ -3,6 +3,7 @@ package com.maiot.easybeach;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -67,13 +68,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Thread checkConnection = new Thread(() -> {
-            if(!Utils.isConnectedToThisServer(Utils.ServerUrl, 1000))
-                Toast.makeText(getApplicationContext(), "Problema di connessione.", Toast.LENGTH_LONG).show();
-        });
-
-        checkConnection.start();
 
         String filePath = getApplicationContext().getFilesDir().getPath().toString()
                 + "/" + getString(R.string.UMBRELLA_FILENAME);
@@ -166,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.i(TAG, "Mappa fetchata!");
             }
             else {
-                Toast.makeText(getApplicationContext(), "Non sono riuscito a aggiornare la mappa", Toast.LENGTH_LONG).show();
+
                 Log.i(TAG, "Non sono riuscito a prendere la mappa...");
                 return;
             }
@@ -174,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
             UpdateColors(FetchedMap, UmbrellaButtons);
 
         } catch (IOException | JSONException e) {
-            throw new RuntimeException(e);
+            this.runOnUiThread(() -> Toast.makeText(this,"Problema di connessione",Toast.LENGTH_LONG).show());
         }
     }
 
