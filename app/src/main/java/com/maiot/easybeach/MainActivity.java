@@ -154,21 +154,20 @@ public class MainActivity extends AppCompatActivity {
     private void UpdateMap()
     {
         try {
-            JSONArray tmp = Utils.TestFetch();
-            if(tmp != null) {
-                FetchedMap = tmp;
+            if(Utils.isConnectedToThisServer(Utils.ServerUrl,1000))
+            {
+                FetchedMap = Utils.TestFetch();;
                 Log.i(TAG, "Mappa fetchata!");
+                UpdateColors(FetchedMap, UmbrellaButtons);
             }
-            else {
-
+            else
+            {
                 Log.i(TAG, "Non sono riuscito a prendere la mappa...");
-                return;
+                this.runOnUiThread(() -> Toast.makeText(this,"Problema di connessione",Toast.LENGTH_LONG).show());
             }
-
-            UpdateColors(FetchedMap, UmbrellaButtons);
 
         } catch (IOException | JSONException e) {
-            this.runOnUiThread(() -> Toast.makeText(this,"Problema di connessione",Toast.LENGTH_LONG).show());
+            Log.e(TAG,"Errore nel recupero della mappa: " + e.getMessage());
         }
     }
 
