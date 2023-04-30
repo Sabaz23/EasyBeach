@@ -97,11 +97,11 @@ public class MainActivity extends AppCompatActivity {
         time.setText(currentDate);
 
         //Set UmbrellaButtons array
-        UmbrellaButtons = new ImageButton[]{findViewById(R.id.btt0),findViewById(R.id.btt1),
-                findViewById(R.id.btt2),findViewById(R.id.btt3),findViewById(R.id.btt4),
-                findViewById(R.id.btt5), findViewById(R.id.btt6),findViewById(R.id.btt7),
-                findViewById(R.id.btt8),findViewById(R.id.btt9),findViewById(R.id.btt10),
-                findViewById(R.id.btt11)};
+        UmbrellaButtons = new ImageButton[]{findViewById(R.id.btt1),findViewById(R.id.btt2),
+                findViewById(R.id.btt3),findViewById(R.id.btt4),findViewById(R.id.btt5),
+                findViewById(R.id.btt6), findViewById(R.id.btt7),findViewById(R.id.btt8),
+                findViewById(R.id.btt9),findViewById(R.id.btt10),findViewById(R.id.btt11),
+                findViewById(R.id.btt12)};
 
 
         //Crea un nuovo thread per aggiornare la mappa ogni minuto
@@ -125,10 +125,10 @@ public class MainActivity extends AppCompatActivity {
 
     private View.OnClickListener UmbrellaListener = view -> {
         PopUpClass popUpClass = new PopUpClass();
-        Button b = (Button)view;
-        int OmbrellaIndex = Integer.parseInt(b.getText().toString());
+        String id = getResources().getResourceName(view.getId()).replace("com.maiot.easybeach:id/btt","");
+        int OmbrellaIndex = Integer.parseInt(id);
         Umbrella u = umbrellas[OmbrellaIndex-1];
-        String numeroFila = "Ombrellone numero " + b.getText();
+        String numeroFila = "Ombrellone numero " + id;
         String header = null;
         String tipo = "Due lettini";
 
