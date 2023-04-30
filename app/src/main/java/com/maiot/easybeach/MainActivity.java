@@ -21,6 +21,7 @@ import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView time = null;
     private Spinner spinner = null;
 
-    private Button UmbrellaButtons[] = null;
+    private ImageButton UmbrellaButtons[] = null;
 
     private File umbrellaFile = null;
 
@@ -96,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         time.setText(currentDate);
 
         //Set UmbrellaButtons array
-        UmbrellaButtons = new Button[]{findViewById(R.id.btt0),findViewById(R.id.btt1),
+        UmbrellaButtons = new ImageButton[]{findViewById(R.id.btt0),findViewById(R.id.btt1),
                 findViewById(R.id.btt2),findViewById(R.id.btt3),findViewById(R.id.btt4),
                 findViewById(R.id.btt5), findViewById(R.id.btt6),findViewById(R.id.btt7),
                 findViewById(R.id.btt8),findViewById(R.id.btt9),findViewById(R.id.btt10),
@@ -171,16 +172,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void UpdateColors(JSONArray map, Button[] buttons) throws JSONException {
+    private void UpdateColors(JSONArray map, ImageButton[] buttons) throws JSONException {
         int index = 0;
         for(int i=0;i<UMBRELLANUMBER;i++)
         {
             if(map.getJSONObject(i).getString("token").equals("null")) {
-                buttons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.green, null));
+                buttons[i].setBackgroundResource(R.drawable.umbrellafree);
                 umbrellas[i].setFree(true);
             }
             else {
-                buttons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.red, null));
+                buttons[i].setBackgroundResource(R.drawable.umbrellaoccupied);
                 umbrellas[i].setFree(false);
             }
         }
