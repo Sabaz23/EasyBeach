@@ -16,24 +16,50 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class Utils {
     private static final String TAG = "Utils";
     private static final int TotalUmbrellas = 12;
-
+    private static final float PrezzoAlMinuto = 0.07f;
+    public static final SimpleDateFormat sdfDisplay = new SimpleDateFormat("HH:mm:ss", Locale.ITALIAN);
     public static final int Timeout = 5000;
-
-    private final static String FetchMapUrl = "http://192.168.1.5/umbrellapp/fetch_map.php";
     public final static String ServerUrl = "http://192.168.1.5/";
+    private final static String FetchMapUrl = ServerUrl + "umbrellapp/fetch_map.php";
+
+
+    private final static String GetAllUrl = ServerUrl + "umbrellapp/getMyUmbrellas.php";
+    private final static String FreeUmbrellaUrl = ServerUrl + "umbrellapp/elaborateReservation.php";
+
+    public static float getPrezzoDaPagare(Calendar sd)
+    {
+        Date sdDate = sd.getTime();
+        Date fdDate = Calendar.getInstance().getTime();
+        long diffInSecs = (fdDate.getTime()-sdDate.getTime())/1000;
+        long diff = TimeUnit.MINUTES.convert(diffInSecs,TimeUnit.SECONDS);
+        float prezzo = diff * PrezzoAlMinuto;
+        BigDecimal bd = new BigDecimal(Double.toString(prezzo));
+        bd = bd.setScale(2, RoundingMode.HALF_DOWN);
+        return bd.floatValue();
+    }
 
     public static JSONArray TestFetch() throws  IOException{
             final OkHttpClient client = new OkHttpClient();
@@ -168,6 +194,68 @@ public class Utils {
             Log.e(TAG,"Errore nella connessione : " + e);
             return false;
         }
+    }
+
+    private static String[] GetAllRequest()
+    {
+        final OkHttpClient client = new OkHttpClient();
+
+        RequestBody formBody = new FormBody.Builder()
+                .add("token", "admin")
+                .build();
+
+        Request request = new Request.Builder()
+                .url(GetAllUrl)
+                .post(formBody)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            return response.body().string().split(";");
+        } catch (IOException e) {
+            return new String[]{};
+        }
+    }
+
+    public static boolean FreeUmbrella(int uid)
+    {
+        final OkHttpClient client = new OkHttpClient();
+
+        RequestBody formBody = new FormBody.Builder()
+                .add("uid", Integer.toString(uid))
+                .add("token", "null")
+                .add("inizioprenotazione", "null")
+                .build();
+
+        Request request = new Request.Builder()
+                .url(FreeUmbrellaUrl)
+                .post(formBody)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    public static Calendar GetDataInizio(int uid) throws ParseException {
+        String[] allUmbrella = GetAllRequest();
+        for(int i=0;i<allUmbrella.length;i++)
+        {
+            String[] tmp = allUmbrella[i].split(" ");
+            if(tmp[0].equals(Integer.toString(uid)))
+            {
+                if(tmp.length != 1) {
+                    Calendar c = Calendar.getInstance();
+                    c.setTime(sdfDisplay.parse(tmp[1]));
+                    c.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));
+                    c.set(Calendar.MONTH, Calendar.getInstance().get(Calendar.MONTH));
+                    c.set(Calendar.DAY_OF_MONTH, Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+                    return c;
+                }
+            }
+        }
+        return null;
     }
 
 

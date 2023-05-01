@@ -49,6 +49,8 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
+
+
     private static final int UMBRELLANUMBER = 12;
     private TextView time = null;
     private Spinner spinner = null;
@@ -60,7 +62,6 @@ public class MainActivity extends AppCompatActivity {
     private Umbrella[] umbrellas = null;
 
     private JSONArray FetchedMap = null;
-    private JSONArray oldMap = null;
 
 
 
@@ -148,7 +149,41 @@ public class MainActivity extends AppCompatActivity {
             header = "Questo ombrellone è attualmente libero.";
         else
             header = "Questo ombrellone è attualmente occupato.";
-        popUpClass.showPopupWindow(view,numeroFila,header,tipo);
+
+        String finalHeader = header;
+        String finalTipo = tipo;
+        Thread thr = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(Utils.isConnectedToThisServer(Utils.ServerUrl,Utils.Timeout))
+                {
+                    String dataInizioString = null;
+                    String PrezzoDaPagare = null;
+                    Calendar dataInizio = Calendar.getInstance();
+                    try {
+                        dataInizio = Utils.GetDataInizio(OmbrellaIndex);
+                        if(dataInizio == null)
+                        {
+                            dataInizioString = "";
+                            PrezzoDaPagare = "";
+                        }else {
+                            dataInizioString = "Ora inizio prenotazione: " + Utils.sdfDisplay.format(dataInizio.getTime());
+                            PrezzoDaPagare = "Prezzo da pagare: " + Utils.getPrezzoDaPagare(dataInizio) + "€";
+                        }
+                    } catch (ParseException e) {
+                        Log.e(TAG,"Problema nel parsing " + e.getMessage());
+                    }
+                    String finalDataInizioString = dataInizioString;
+                    String finalPrezzoDaPagare = PrezzoDaPagare;
+                    runOnUiThread(() -> popUpClass.showPopupWindow(view,numeroFila, finalHeader,
+                            finalTipo, finalDataInizioString, finalPrezzoDaPagare));
+                }
+                else
+                    runOnUiThread(() -> Toast.makeText(getApplicationContext(),"Problema di connessione", Toast.LENGTH_LONG).show());
+            }
+        });
+        thr.start();
+
     };
 
     private void UpdateMap()

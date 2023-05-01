@@ -13,7 +13,7 @@ public class PopUpClass {
 
     //PopupWindow display method
 
-    public void showPopupWindow(final View view,String NumeroFila, String NomeCognome, String tipo) {
+    public void showPopupWindow(final View view,String NumeroFila, String NomeCognome, String tipo, String DataInizio, String prezzo) {
 
 
         //Create a View object yourself through inflater
@@ -36,11 +36,34 @@ public class PopUpClass {
         TextView tvpopupnome = popupView.findViewById(R.id.tvpopupnome);
         TextView tvpopupnumeroefila = popupView.findViewById(R.id.tvpopupnumeroefila);
         TextView tvpopuptipo = popupView.findViewById(R.id.tvpopuptipo);
+        TextView tvdatainizio = popupView.findViewById(R.id.tvdatainizio);
+        TextView tvprezzo = popupView.findViewById(R.id.tvPrezzoDaPagare);
+        Button bttliberaombrellone = popupView.findViewById(R.id.bttlibera);
 
         //Set the textviews
         tvpopupnome.setText(NomeCognome);
         tvpopupnumeroefila.setText(NumeroFila);
         tvpopuptipo.setText(tipo);
+        tvdatainizio.setText(DataInizio);
+        tvprezzo.setText(prezzo);
+
+        if(tvprezzo.getText() == "")
+            bttliberaombrellone.setEnabled(false);
+        else
+            bttliberaombrellone.setEnabled(true);
+
+        bttliberaombrellone.setOnClickListener(view1 -> {
+            Thread thr = new Thread(() -> {
+                if(Utils.isConnectedToThisServer(Utils.ServerUrl,Utils.Timeout))
+                {
+                    Utils.FreeUmbrella(Integer.parseInt(tvpopupnumeroefila.getText().toString().replace("Ombrellone numero ","")));
+                }
+            });
+
+            thr.start();
+
+
+        });
 
         //Handler for clicking on the inactive zone of the window
 

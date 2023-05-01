@@ -38,6 +38,32 @@
         android:textSize="22sp"
         android:textColor="@color/black"/>
 
+    <TextView
+        android:id="@+id/tvdatainizio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textAlignment="center"
+        android:text=""
+        android:textSize="22sp"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/tvPrezzoDaPagare"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textAlignment="center"
+        android:text=""
+        android:textSize="22sp"
+        android:textColor="@color/black"/>
+
+    <Button
+        android:id="@+id/bttlibera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Libera"
+        />
 
 
 
