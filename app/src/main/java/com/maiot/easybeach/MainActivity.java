@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
     private void UpdateMap()
     {
         try {
-            if(Utils.isConnectedToThisServer(Utils.ServerUrl,1000))
+            if(Utils.isConnectedToThisServer(Utils.ServerUrl,Utils.Timeout))
             {
                 FetchedMap = Utils.TestFetch();;
                 Log.i(TAG, "Mappa fetchata!");

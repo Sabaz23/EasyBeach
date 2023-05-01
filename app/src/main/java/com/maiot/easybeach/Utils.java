@@ -30,12 +30,12 @@ public class Utils {
     private static final String TAG = "Utils";
     private static final int TotalUmbrellas = 12;
 
-    private final static String FetchMapUrl = "http://192.168.1.10/umbrellapp/fetch_map.php";
-    public final static String ServerUrl = "http://192.168.1.10/";
+    public static final int Timeout = 5000;
+
+    private final static String FetchMapUrl = "http://192.168.1.5/umbrellapp/fetch_map.php";
+    public final static String ServerUrl = "http://192.168.1.5/";
 
     public static JSONArray TestFetch() throws  IOException{
-
-            //Controlla se riesce a connettersi al server dove si trova il file della mappa
             final OkHttpClient client = new OkHttpClient();
 
             //Crea la richiesta e prova a prenderne il body (il file php ritorna un file json)
