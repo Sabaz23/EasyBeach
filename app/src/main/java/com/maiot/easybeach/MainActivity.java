@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
     private JSONArray FetchedMap = null;
 
-
+    Timer UpdateMapTimer = new Timer();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,13 +105,13 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Crea un nuovo thread per aggiornare la mappa ogni minuto
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask()
+        UpdateMapTimer = new Timer();
+        UpdateMapTimer.schedule(new TimerTask()
         {
             public void run() {
                 UpdateMap();
             }
-        }, 0, 60*1000);
+        }, 0, 5*1000);
 
 
         //Set listeners
@@ -185,6 +185,24 @@ public class MainActivity extends AppCompatActivity {
         thr.start();
 
     };
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        UpdateMapTimer.cancel();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        UpdateMapTimer = new Timer();
+        UpdateMapTimer.schedule(new TimerTask()
+        {
+            public void run() {
+                UpdateMap();
+            }
+        }, 0, 5*1000);
+    }
 
     private void UpdateMap()
     {
