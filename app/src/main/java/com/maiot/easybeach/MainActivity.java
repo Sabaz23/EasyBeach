@@ -21,7 +21,6 @@ import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView time = null;
     private Spinner spinner = null;
 
-    private ImageButton UmbrellaButtons[] = null;
+    private Button UmbrellaButtons[] = null;
 
     private File umbrellaFile = null;
 
@@ -98,11 +97,11 @@ public class MainActivity extends AppCompatActivity {
         time.setText(currentDate);
 
         //Set UmbrellaButtons array
-        UmbrellaButtons = new ImageButton[]{findViewById(R.id.btt1),findViewById(R.id.btt2),
-                findViewById(R.id.btt3),findViewById(R.id.btt4),findViewById(R.id.btt5),
-                findViewById(R.id.btt6), findViewById(R.id.btt7),findViewById(R.id.btt8),
-                findViewById(R.id.btt9),findViewById(R.id.btt10),findViewById(R.id.btt11),
-                findViewById(R.id.btt12)};
+        UmbrellaButtons = new Button[]{findViewById(R.id.btt0),findViewById(R.id.btt1),
+                findViewById(R.id.btt2),findViewById(R.id.btt3),findViewById(R.id.btt4),
+                findViewById(R.id.btt5), findViewById(R.id.btt6),findViewById(R.id.btt7),
+                findViewById(R.id.btt8),findViewById(R.id.btt9),findViewById(R.id.btt10),
+                findViewById(R.id.btt11)};
 
 
         //Crea un nuovo thread per aggiornare la mappa ogni minuto
@@ -126,10 +125,10 @@ public class MainActivity extends AppCompatActivity {
 
     private View.OnClickListener UmbrellaListener = view -> {
         PopUpClass popUpClass = new PopUpClass();
-        String id = getResources().getResourceName(view.getId()).replace("com.maiot.easybeach:id/btt","");
-        int OmbrellaIndex = Integer.parseInt(id);
+        Button b = (Button)view;
+        int OmbrellaIndex = Integer.parseInt(b.getText().toString());
         Umbrella u = umbrellas[OmbrellaIndex-1];
-        String numeroFila = "Ombrellone numero " + id;
+        String numeroFila = "Ombrellone numero " + b.getText();
         String header = null;
         String tipo = "Due lettini";
 
@@ -207,16 +206,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void UpdateColors(JSONArray map, ImageButton[] buttons) throws JSONException {
+    private void UpdateColors(JSONArray map, Button[] buttons) throws JSONException {
         int index = 0;
         for(int i=0;i<UMBRELLANUMBER;i++)
         {
             if(map.getJSONObject(i).getString("token").equals("null")) {
-                buttons[i].setBackgroundResource(R.drawable.umbrellafree);
+                buttons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.green, null));
                 umbrellas[i].setFree(true);
             }
             else {
-                buttons[i].setBackgroundResource(R.drawable.umbrellaoccupied);
+                buttons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.red, null));
                 umbrellas[i].setFree(false);
             }
         }
