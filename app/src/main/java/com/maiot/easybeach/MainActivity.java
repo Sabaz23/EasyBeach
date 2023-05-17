@@ -1,62 +1,40 @@
 package com.maiot.easybeach;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
 
-import android.app.Activity;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.nfc.NfcAdapter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.webkit.ValueCallback;
-import android.webkit.WebView;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.snackbar.Snackbar;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.Clock;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
+    //Tag per log
     private static final String TAG = "MainActivity";
-
-
-
+    //Variabile final per il numero di ombrelloni della spiaggia
     private static final int UMBRELLANUMBER = 12;
+
+    //TextView//
     private TextView time = null;
-    private Spinner spinner = null;
+    private TextView updateTime = null;
 
-    private Button UmbrellaButtons[] = null;
-
+    //Buttons//
+    private Button bttAggiorna = null;
+    private ImageButton UmbrellaButtons[] = null;
     private File umbrellaFile = null;
 
     private Umbrella[] umbrellas = null;
@@ -83,25 +61,32 @@ public class MainActivity extends AppCompatActivity {
 
         Log.i(TAG, "Ombrelloni caricati.");
 
-
-        //Get current Date
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN);
-        Calendar c = Calendar.getInstance();
-        String date = sdf.format(c.getTime());
-        String currentDate = "Data corrente: " + date;
-
         //Set ID
         time = findViewById(R.id.tvtime);
+        updateTime = findViewById(R.id.tvultimoaggiornamento);
+        bttAggiorna = findViewById(R.id.bttaggiorna);
+
 
         //Set Date
-        time.setText(currentDate);
+        Timer ClockTimer =new Timer();
+        ClockTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(() -> {
+                    Calendar c = Calendar.getInstance();
+                    String date = Utils.sdfDisplay.format(c.getTime());
+                    String currentDate = "Orario attuale: " + date;
+                    time.setText(currentDate);
+                });
+            }
+        },0,1000);
 
         //Set UmbrellaButtons array
-        UmbrellaButtons = new Button[]{findViewById(R.id.btt0),findViewById(R.id.btt1),
-                findViewById(R.id.btt2),findViewById(R.id.btt3),findViewById(R.id.btt4),
-                findViewById(R.id.btt5), findViewById(R.id.btt6),findViewById(R.id.btt7),
-                findViewById(R.id.btt8),findViewById(R.id.btt9),findViewById(R.id.btt10),
-                findViewById(R.id.btt11)};
+        UmbrellaButtons = new ImageButton[]{findViewById(R.id.btt1),findViewById(R.id.btt2),
+                findViewById(R.id.btt3),findViewById(R.id.btt4),findViewById(R.id.btt5),
+                findViewById(R.id.btt6), findViewById(R.id.btt7),findViewById(R.id.btt8),
+                findViewById(R.id.btt9),findViewById(R.id.btt10),findViewById(R.id.btt11),
+                findViewById(R.id.btt12)};
 
 
         //Crea un nuovo thread per aggiornare la mappa ogni minuto
@@ -111,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 UpdateMap();
             }
-        }, 0, 5*1000);
+        }, 0, 300*1000); //Ogni 5 minuti
 
 
         //Set listeners
@@ -119,16 +104,23 @@ public class MainActivity extends AppCompatActivity {
         {
             UmbrellaButtons[i].setOnClickListener(UmbrellaListener);
         }
+        bttAggiorna.setOnClickListener(UpdateListener);
 
     }
 
 
+    private View.OnClickListener UpdateListener = view ->
+    {
+        Thread thr = new Thread(this::UpdateMap);
+        thr.start();
+    };
+
     private View.OnClickListener UmbrellaListener = view -> {
         PopUpClass popUpClass = new PopUpClass();
-        Button b = (Button)view;
-        int OmbrellaIndex = Integer.parseInt(b.getText().toString());
+        String id = getResources().getResourceName(view.getId()).replace("com.maiot.easybeach:id/btt", "");
+        int OmbrellaIndex = Integer.parseInt(id);
         Umbrella u = umbrellas[OmbrellaIndex-1];
-        String numeroFila = "Ombrellone numero " + b.getText();
+        String numeroFila = "Ombrellone numero " + id;
         String header = null;
         String tipo = "Due lettini";
 
@@ -201,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 UpdateMap();
             }
-        }, 0, 5*1000);
+        }, 0, 300 *1000); //Ogni 5 minuti
     }
 
     private void UpdateMap()
@@ -212,6 +204,12 @@ public class MainActivity extends AppCompatActivity {
                 FetchedMap = Utils.TestFetch();;
                 Log.i(TAG, "Mappa fetchata!");
                 UpdateColors(FetchedMap, UmbrellaButtons);
+                this.runOnUiThread(() -> {
+                    Calendar c = Calendar.getInstance();
+                    String date = Utils.sdfDisplay.format(c.getTime());
+                    String currentDate = "Ultimo aggiornamento mappa: " + date;
+                    updateTime.setText(currentDate);
+                });
             }
             else
             {
@@ -224,16 +222,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void UpdateColors(JSONArray map, Button[] buttons) throws JSONException {
+    private void UpdateColors(JSONArray map, ImageButton[] buttons) throws JSONException {
         int index = 0;
         for(int i=0;i<UMBRELLANUMBER;i++)
         {
             if(map.getJSONObject(i).getString("token").equals("null")) {
-                buttons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.green, null));
+                int finalI1 = i;
+                runOnUiThread((Runnable) () -> buttons[finalI1].setImageResource(R.drawable.umbrellafree));
                 umbrellas[i].setFree(true);
             }
             else {
-                buttons[i].setBackgroundColor(ResourcesCompat.getColor(getResources(), R.color.red, null));
+                int finalI = i;
+                runOnUiThread((Runnable) () -> buttons[finalI].setImageResource(R.drawable.umbrellaoccupied));
                 umbrellas[i].setFree(false);
             }
         }
