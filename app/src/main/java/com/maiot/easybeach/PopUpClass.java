@@ -1,4 +1,5 @@
 package com.maiot.easybeach;
+import android.graphics.Color;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -47,10 +48,14 @@ public class PopUpClass {
         tvdatainizio.setText(DataInizio);
         tvprezzo.setText(prezzo);
 
-        if(tvprezzo.getText() == "")
+        if(tvprezzo.getText() == ""){
             bttliberaombrellone.setEnabled(false);
-        else
+            bttliberaombrellone.setBackgroundColor(Color.rgb(192, 192, 192));
+        }
+        else{
             bttliberaombrellone.setEnabled(true);
+            bttliberaombrellone.setBackgroundColor(Color.rgb(0, 0, 255));
+        }
 
         bttliberaombrellone.setOnClickListener(view1 -> {
             Thread thr = new Thread(() -> {
