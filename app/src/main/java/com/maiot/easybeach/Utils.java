@@ -42,7 +42,7 @@ public class Utils {
     private static final float PrezzoAlMinuto = 0.07f;
     public static final SimpleDateFormat sdfDisplay = new SimpleDateFormat("HH:mm:ss", Locale.ITALIAN);
     public static final int Timeout = 5000;
-    public final static String ServerUrl = "http://192.168.1.118/";
+    public final static String ServerUrl = "http://192.168.1.186/";
     private final static String FetchMapUrl = ServerUrl + "umbrellapp/fetch_map.php";
 
 
@@ -61,7 +61,7 @@ public class Utils {
         return bd.floatValue();
     }
 
-    public static JSONArray TestFetch() throws  IOException{
+    public static JSONArray FetchMap() throws  IOException{
             final OkHttpClient client = new OkHttpClient();
 
             //Crea la richiesta e prova a prenderne il body (il file php ritorna un file json)

@@ -10,13 +10,11 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class PopUpClass {
+public class PopUpClass{
 
     //PopupWindow display method
 
-    public void showPopupWindow(final View view,String NumeroFila, String NomeCognome, String tipo, String DataInizio, String prezzo) {
-
-
+    public void showPopupWindow(final View view,String NumeroFila, String NomeCognome, String tipo, String DataInizio, String prezzo, MainActivity mainActivity) {
         //Create a View object yourself through inflater
         LayoutInflater inflater = (LayoutInflater) view.getContext().getSystemService(view.getContext().LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_window, null);
@@ -49,13 +47,17 @@ public class PopUpClass {
         tvprezzo.setText(prezzo);
 
         if(tvprezzo.getText() == ""){
+            bttliberaombrellone.setVisibility(View.GONE);
             bttliberaombrellone.setEnabled(false);
-            bttliberaombrellone.setBackgroundColor(Color.rgb(192, 192, 192));
+            //bttliberaombrellone.setBackgroundColor(Color.rgb(192, 192, 192));
         }
         else{
+            bttliberaombrellone.setVisibility(View.VISIBLE);
             bttliberaombrellone.setEnabled(true);
-            bttliberaombrellone.setBackgroundColor(Color.rgb(0, 0, 255));
+            //bttliberaombrellone.setBackgroundColor(Color.rgb(0, 0, 255));
         }
+
+
 
         bttliberaombrellone.setOnClickListener(view1 -> {
             Thread thr = new Thread(() -> {
@@ -67,20 +69,20 @@ public class PopUpClass {
 
             thr.start();
 
+            popupWindow.dismiss();
+            mainActivity.IsMapToUpdateFromPopup.postValue(!mainActivity.IsMapToUpdateFromPopup.getValue());
 
         });
-
-        //Handler for clicking on the inactive zone of the window
 
         popupView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
-                //Close the window when clicked
                 popupWindow.dismiss();
                 return true;
             }
         });
     }
+
 
 }

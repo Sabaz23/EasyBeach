@@ -1,6 +1,9 @@
 package com.maiot.easybeach;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -42,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
     private JSONArray FetchedMap = null;
 
     Timer UpdateMapTimer = new Timer();
+
+    public MutableLiveData<Boolean> IsMapToUpdateFromPopup = new MutableLiveData<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +112,14 @@ public class MainActivity extends AppCompatActivity {
         }
         bttAggiorna.setOnClickListener(UpdateListener);
 
+        IsMapToUpdateFromPopup.setValue(false);
+
+        IsMapToUpdateFromPopup.observe(this, aBoolean -> {
+            Thread thr = new Thread(this::UpdateMap);
+            thr.start();
+        });
+
+
     }
 
 
@@ -168,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
                     String finalDataInizioString = dataInizioString;
                     String finalPrezzoDaPagare = PrezzoDaPagare;
                     runOnUiThread(() -> popUpClass.showPopupWindow(view,numeroFila, finalHeader,
-                            finalTipo, finalDataInizioString, finalPrezzoDaPagare));
+                            finalTipo, finalDataInizioString, finalPrezzoDaPagare, MainActivity.this));
                 }
                 else
                     runOnUiThread(() -> Toast.makeText(getApplicationContext(),"Problema di connessione", Toast.LENGTH_LONG).show());
@@ -196,12 +210,12 @@ public class MainActivity extends AppCompatActivity {
         }, 0, 300 *1000); //Ogni 5 minuti
     }
 
-    private void UpdateMap()
+    public void UpdateMap()
     {
         try {
             if(Utils.isConnectedToThisServer(Utils.ServerUrl,Utils.Timeout))
             {
-                FetchedMap = Utils.TestFetch();;
+                FetchedMap = Utils.FetchMap();
                 Log.i(TAG, "Mappa fetchata!");
                 UpdateColors(FetchedMap, UmbrellaButtons);
                 this.runOnUiThread(() -> {
