@@ -37,15 +37,22 @@ public class MainActivity extends AppCompatActivity {
 
     //Buttons//
     private Button bttAggiorna = null;
-    private ImageButton UmbrellaButtons[] = null;
+    private ImageButton[] UmbrellaButtons = null;
+
+    //File contenente dati degli ombrelloni//
     private File umbrellaFile = null;
 
+    //Array di Ombrelloni//
     private Umbrella[] umbrellas = null;
 
+    //JsonArray contenente la mappa recuperata dal database//
     private JSONArray FetchedMap = null;
 
+    //Timer Per aggiornare la mappa ogni 5 minuti//
     Timer UpdateMapTimer = new Timer();
 
+    //Variabile con observer per capire quando aggiornare la mappa dopo aver liberato
+    //un'ombrellone dal popup
     public MutableLiveData<Boolean> IsMapToUpdateFromPopup = new MutableLiveData<>();
 
 
@@ -59,21 +66,24 @@ public class MainActivity extends AppCompatActivity {
 
         umbrellaFile = new File(filePath);
 
-        Log.i(TAG, "Esiste " + umbrellaFile.exists() + filePath);
+        //Per semplicità la prima volta che installiamo l'app generiamo la mappa degli
+        //ombrelloni casualmente. "GenerateUmbrellaFirstTime" non sarebbe applicato anche in un contesto
+        //reale, ma andrebbe fatto manualmente basandosi su degli input da parte dell'
+        //utilizzatore.
         if(umbrellaFile.exists())
             umbrellas = Utils.LoadUmbrellaFile(umbrellaFile,getApplicationContext());
         else
-            umbrellas = Utils.PopulateRowsFirstTime(umbrellaFile, getApplicationContext());
+            umbrellas = Utils.GenerateUmbrellaFirstTime(umbrellaFile, getApplicationContext());
 
         Log.i(TAG, "Ombrelloni caricati.");
 
-        //Set ID
+        //ID//
         time = findViewById(R.id.tvtime);
         updateTime = findViewById(R.id.tvultimoaggiornamento);
         bttAggiorna = findViewById(R.id.bttaggiorna);
 
 
-        //Set Date
+        //Creiamo un orologio per visualizzare l'ora corrente//
         Timer ClockTimer =new Timer();
         ClockTimer.schedule(new TimerTask() {
             @Override
@@ -87,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
             }
         },0,1000);
 
-        //Set UmbrellaButtons array
+        //Impostiamo l'array di bottoni di ombrelloni//
         UmbrellaButtons = new ImageButton[]{findViewById(R.id.btt1),findViewById(R.id.btt2),
                 findViewById(R.id.btt3),findViewById(R.id.btt4),findViewById(R.id.btt5),
                 findViewById(R.id.btt6), findViewById(R.id.btt7),findViewById(R.id.btt8),
@@ -95,25 +105,29 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.btt12)};
 
 
-        //Crea un nuovo thread per aggiornare la mappa ogni minuto
+        //Crea un nuovo timer per aggiornare la mappa ogni 5 minuti//
         UpdateMapTimer = new Timer();
         UpdateMapTimer.schedule(new TimerTask()
         {
             public void run() {
                 UpdateMap();
             }
-        }, 0, 300*1000); //Ogni 5 minuti
+        }, 0, 300*1000);
 
 
-        //Set listeners
+        //Listener//
         for(int i=0;i<UMBRELLANUMBER;i++)
         {
             UmbrellaButtons[i].setOnClickListener(UmbrellaListener);
         }
         bttAggiorna.setOnClickListener(UpdateListener);
 
+        //IsMapToUpdateFromPopup viene impostata a false la prima volta, ma in realtà è indifferente.
+        //Nella classe PopUpClass, se il bottone per liberare un ombrellone viene premuto, viene
+        //impostata la negazione del valore che si trova in quel momento all'interno della variabile. Quindi
+        //se true diventa false e se false diventa true. Non hanno un significato logico ma servono
+        //solo a "triggerare" l'observer per aggiornare la mappa.
         IsMapToUpdateFromPopup.setValue(false);
-
         IsMapToUpdateFromPopup.observe(this, aBoolean -> {
             Thread thr = new Thread(this::UpdateMap);
             thr.start();
@@ -122,22 +136,24 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
+    //Listener del bottone per "Aggiorna Mappa"//
     private View.OnClickListener UpdateListener = view ->
     {
         Thread thr = new Thread(this::UpdateMap);
         thr.start();
-    };
 
+    };
+    //Listener di ogni bottone//
     private View.OnClickListener UmbrellaListener = view -> {
         PopUpClass popUpClass = new PopUpClass();
+        //Siccome sono chiamati tutti alla stessa maniera,
+        //Per tenere l'id rimuoviamo "com.maiot.easybeach:id/btt" che è presente in ogni bottone
         String id = getResources().getResourceName(view.getId()).replace("com.maiot.easybeach:id/btt", "");
         int OmbrellaIndex = Integer.parseInt(id);
         Umbrella u = umbrellas[OmbrellaIndex-1];
         String numeroFila = "Ombrellone numero " + id;
         String header = null;
         String tipo = "Due lettini";
-
         switch(u.getType())
         {
             case 'A':
@@ -181,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     String finalDataInizioString = dataInizioString;
                     String finalPrezzoDaPagare = PrezzoDaPagare;
+                    //showPopupWindow crea il popup sopra la mainactivity
                     runOnUiThread(() -> popUpClass.showPopupWindow(view,numeroFila, finalHeader,
                             finalTipo, finalDataInizioString, finalPrezzoDaPagare, MainActivity.this));
                 }
@@ -195,21 +212,28 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        //Quando l'activity va in pausa non è necessario aggiornare
+        //la mappa perchè non la vediamo in ogni caso
         UpdateMapTimer.cancel();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        //Quando riprendiamo l'activity, è necessario ricreare un nuovo timer perchè quello vecchio
+        //e' andato distrutto nell'onPause
         UpdateMapTimer = new Timer();
         UpdateMapTimer.schedule(new TimerTask()
         {
             public void run() {
                 UpdateMap();
             }
-        }, 0, 300 *1000); //Ogni 5 minuti
+        }, 0, 300 *1000);
     }
 
+    //UpdateMap si occupa di recuperare dal database la mappa e di aggiornare
+    //le icone dei bottoni basandosi sui valori presenti all'interno del JSONArray
+    //ritornato dal server.
     public void UpdateMap()
     {
         try {

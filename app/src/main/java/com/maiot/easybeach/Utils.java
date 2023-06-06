@@ -49,6 +49,7 @@ public class Utils {
     private final static String GetAllUrl = ServerUrl + "umbrellapp/getMyUmbrellas.php";
     private final static String FreeUmbrellaUrl = ServerUrl + "umbrellapp/elaborateReservation.php";
 
+    //Questo metodo ritorna il prezzo da pagare con una precisione di 2 dopo la virgola.
     public static float getPrezzoDaPagare(Calendar sd)
     {
         Date sdDate = sd.getTime();
@@ -61,6 +62,7 @@ public class Utils {
         return bd.floatValue();
     }
 
+    //Questo metodo invia una richiesta HTTP al server per recuperare la mappa
     public static JSONArray FetchMap() throws  IOException{
             final OkHttpClient client = new OkHttpClient();
 
@@ -73,6 +75,7 @@ public class Utils {
             }
     }
 
+    //Questo metodo carica gli ombrelloni da umbrellaFile
     public static Umbrella[] LoadUmbrellaFile(File umbrellaFile, Context AppContext)
     {
         String contents = ReadFile(AppContext, umbrellaFile);
@@ -80,7 +83,6 @@ public class Utils {
         String[] Umbrellas = contents.split("\n");
         String[] UmbrellaValues;
         Umbrella tmp;
-        ArrayList<Umbrella> tmpArray = new ArrayList<>();
         for(int i=0;i<Umbrellas.length;i++)
         {
             UmbrellaValues = Umbrellas[i].split(",");
@@ -88,14 +90,9 @@ public class Utils {
             //Variabili per inizializzare UmbrellaTmp
             char TypeOfUmbrella = UmbrellaValues[0].charAt(0);
             boolean free = Boolean.parseBoolean(UmbrellaValues[1]);
-            String token = null;
-
-            //Se non è libero, esiste un token associato
-            if(!free)
-                token = UmbrellaValues[2];
 
             //Creo un ombrellone temporaneo con la riga letta e lo aggiungo all'array
-            tmp = new Umbrella(i+1, TypeOfUmbrella, free, token);
+            tmp = new Umbrella(i+1, TypeOfUmbrella, free);
             umbrellaArrayList.add(tmp);
         }
         Umbrella[] arrayOfUmbrellas = new Umbrella[umbrellaArrayList.size()];
@@ -103,6 +100,7 @@ public class Utils {
         return arrayOfUmbrellas;
     }
 
+    //Questo metodo salva gli ombrelloni dall'array al file.
     public static void SaveUmbrellaFile(File umbrellaFile, Umbrella[] data, Context AppContext)
     {
         try{
@@ -111,14 +109,9 @@ public class Utils {
             FileOutputStream fos = AppContext.openFileOutput(umbrellaFile.getName(), Context.MODE_PRIVATE);
             String dataToWrite;
             byte[] byteToWrite;
-            for(int i = 0; i<data.length;i++)
-            {
-                dataToWrite = (data[i].getType() + "," + data[i].isFree());
-
-                if(data[i].getToken() != null)
-                    byteToWrite = (dataToWrite + "," + data[i].getToken() + "\n").getBytes(StandardCharsets.UTF_8);
-                else
-                    byteToWrite = (dataToWrite + "\n").getBytes(StandardCharsets.UTF_8);
+            for (Umbrella datum : data) {
+                dataToWrite = (datum.getType() + "," + datum.isFree());
+                byteToWrite = (dataToWrite + "\n").getBytes(StandardCharsets.UTF_8);
 
                 fos.write(byteToWrite);
             }
@@ -132,12 +125,9 @@ public class Utils {
         }
     }
 
-    //Per semplicità la prima volta che installiamo l'app generiamo la mappa degli
-    //ombrelloni casualmente. Questo metodo non sarebbe applicato anche in un contesto
-    //reale, ma andrebbe fatto manualmente basandosi su degli input da parte dell'
-    //utilizzatore.
 
-    public static Umbrella[] PopulateRowsFirstTime(File filename, Context appContext)
+    //Questo metodo genera casualmente gli ombrelloni
+    public static Umbrella[] GenerateUmbrellaFirstTime(File filename, Context appContext)
     {
         Umbrella u;
         ArrayList<Umbrella>uArr = new ArrayList<>();
@@ -146,18 +136,19 @@ public class Utils {
         {
             Random r = new Random();
             u = new Umbrella(i+1, UmbrellaTypes.charAt(r.nextInt(UmbrellaTypes.length())),
-                    true,null);
+                    true);
             uArr.add(u);
         }
 
         Umbrella[] UmbArray = new Umbrella[uArr.size()];
         uArr.toArray(UmbArray);
+        //Dopo averli generati, salva il file
         SaveUmbrellaFile(filename, UmbArray, appContext);
 
         return UmbArray;
     }
 
-
+    //Metodo per semplificare la lettura
     public static String ReadFile(Context AppContext, File filename)
     {
         FileInputStream fis = null;
@@ -183,6 +174,7 @@ public class Utils {
         return stringBuilder.toString();
     }
 
+    //Questo metodo verifica di essere connessi al server che viene passato come argomento
     public static boolean isConnectedToThisServer(String url, int timeout) {
         try{
             URL myUrl = new URL(url);
@@ -196,6 +188,7 @@ public class Utils {
         }
     }
 
+    //Questo metodo ritorna tutti gli ombrelloni come array di stringhe.
     private static String[] GetAllRequest()
     {
         final OkHttpClient client = new OkHttpClient();
@@ -215,7 +208,7 @@ public class Utils {
             return new String[]{};
         }
     }
-
+    //Questo metodo libera un ombrellone passato per parametro sul server.
     public static boolean FreeUmbrella(int uid)
     {
         final OkHttpClient client = new OkHttpClient();
@@ -237,15 +230,13 @@ public class Utils {
             return false;
         }
     }
-
+    //Questo metodo recupera e parsa la data di inizio di un dato ombrellone.
     public static Calendar GetDataInizio(int uid) throws ParseException {
         String[] allUmbrella = GetAllRequest();
-        for(int i=0;i<allUmbrella.length;i++)
-        {
-            String[] tmp = allUmbrella[i].split(" ");
-            if(tmp[0].equals(Integer.toString(uid)))
-            {
-                if(tmp.length != 1) {
+        for (String s : allUmbrella) {
+            String[] tmp = s.split(" ");
+            if (tmp[0].equals(Integer.toString(uid))) {
+                if (tmp.length != 1) {
                     Calendar c = Calendar.getInstance();
                     c.setTime(sdfDisplay.parse(tmp[1]));
                     c.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));

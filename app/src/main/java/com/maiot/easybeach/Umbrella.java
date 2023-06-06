@@ -8,17 +8,16 @@ import java.util.Calendar;
 import java.util.Date;
 public class Umbrella {
     private int uid;
-    //A is chair+chair, B is chair+bed, C is bed+bed
+    //Il tipo è indicato con A,B,C
     private char type;
     private boolean free;
-    private String token;
 
     public Umbrella()
     {
         this.type = 'A';
         this.free = true;
     }
-    public Umbrella(int uid, char t, boolean f, String token)
+    public Umbrella(int uid, char t, boolean f)
     {
         this.uid = uid;
         this.type = t;
@@ -39,16 +38,6 @@ public class Umbrella {
 
     public void setFree(boolean free) {
         this.free = free;
-    }
-
-    public void setToken(String token)
-    {
-        this.token = token;
-    }
-
-    public String getToken()
-    {
-        return this.token;
     }
 
     public int getUid() {return this.uid;}
