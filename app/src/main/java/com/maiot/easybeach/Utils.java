@@ -42,7 +42,7 @@ public class Utils {
     private static final float PrezzoAlMinuto = 0.07f;
     public static final SimpleDateFormat sdfDisplay = new SimpleDateFormat("HH:mm:ss", Locale.ITALIAN);
     public static final int Timeout = 5000;
-    public final static String ServerUrl = "http://192.168.1.186/";
+    public final static String ServerUrl = "http://localhost/";
     private final static String FetchMapUrl = ServerUrl + "umbrellapp/fetch_map.php";
 
 
